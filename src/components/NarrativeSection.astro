@@ -1,0 +1,355 @@
+---
+//@ts-nocheck
+
+interface Props {
+  id?: string;
+  title: string;
+  text: string;
+  visualType?: "image" | "text" | "custom";
+  align?: "left" | "right";
+  animation?: "fade" | "slide" | "lift";
+  stepNumber?: string;
+  class?: string;
+}
+
+const {
+  id,
+  title,
+  text,
+  visualType = "text",
+  align = "left",
+  animation = "fade",
+  stepNumber,
+  class: className,
+} = Astro.props;
+---
+
+<section
+  id={id}
+  class={`narrative-section ${align} ${className || ""}`}
+  data-animation={animation}
+>
+  <div class="background-glow"></div>
+  <div class="container relative">
+    <!-- Timeline Guide -->
+    <div class="timeline-guide">
+      <div class="line-container">
+        <div class="line-background"></div>
+        <div class="line-progress"></div>
+      </div>
+      <div class="timeline-node">
+        <span class="node-inner"></span>
+      </div>
+    </div>
+
+    <!-- Content Side -->
+    <div class="content-col">
+      <div class="content card-glass">
+        {stepNumber && <span class="step-number">{stepNumber}</span>}
+        <h2 class="section-title">{title}</h2>
+        <p class="section-text">{text}</p>
+      </div>
+    </div>
+
+    <!-- Visual Side -->
+    <div class="visual-col">
+      <div class="visual card-glass">
+        <slot name="visual">
+          <div class="visual-placeholder">
+            <div class="placeholder-content">
+              <span>Visual Placeholder</span>
+            </div>
+          </div>
+        </slot>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .narrative-section {
+    position: relative;
+    min-height: 85vh; /* slightly taller */
+    display: flex;
+    align-items: center;
+    padding: 6rem 0;
+    overflow: hidden;
+  }
+
+  /* Improved Background */
+  .background-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(
+      circle at center,
+      rgba(40, 40, 40, 1) 0%,
+      rgba(20, 20, 20, 1) 60%,
+      rgba(10, 10, 10, 1) 100%
+    );
+    z-index: -1;
+    opacity: 0.8;
+  }
+
+  /* Add subtle grain/noise if we can, or just keep it clean dark */
+
+  .container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Desktop Layout: Zig-zag with central line */
+  @media (min-width: 768px) {
+    .container {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0; /* Gap handled by padding/margin around line */
+    }
+
+    .content-col,
+    .visual-col {
+      flex: 1;
+      width: 45%; /* Leave 10% for center info */
+      padding: 0 2rem;
+    }
+
+    /* Left Align (Default) */
+    .narrative-section.left .content-col {
+      order: 1;
+      text-align: right;
+    }
+    .narrative-section.left .timeline-guide {
+      order: 2;
+    }
+    .narrative-section.left .visual-col {
+      order: 3;
+    }
+
+    .narrative-section.left .content {
+      align-items: flex-end;
+    }
+
+    /* Right Align */
+    .narrative-section.right .visual-col {
+      order: 1;
+    }
+    .narrative-section.right .timeline-guide {
+      order: 2;
+    }
+    .narrative-section.right .content-col {
+      order: 3;
+      text-align: left;
+    }
+  }
+
+  /* Timeline Styles */
+  .timeline-guide {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 4px;
+    height: 100%;
+    min-height: 400px; /* Ensure line has length */
+    flex-shrink: 0;
+    margin: 2rem 0;
+  }
+
+  @media (min-width: 768px) {
+    .timeline-guide {
+      width: 60px; /* Width of the central channel */
+      margin: 0;
+    }
+  }
+
+  .line-container {
+    position: absolute;
+    top: -50vh; /* Extend way up and down to Connect */
+    bottom: -50vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .line-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .line-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0%; /* animate this */
+    background: var(--color-accent);
+    box-shadow: 0 0 10px var(--color-accent);
+  }
+
+  .timeline-node {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #111;
+    border: 2px solid #555;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease;
+  }
+
+  .node-inner {
+    width: 8px;
+    height: 8px;
+    background: #555;
+    border-radius: 50%;
+    transition: all 0.5s ease;
+  }
+
+  .timeline-node.active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 15px rgba(211, 84, 0, 0.5);
+  }
+
+  .timeline-node.active .node-inner {
+    background: var(--color-accent);
+  }
+
+  /* Card Glass Effect */
+  .content,
+  .visual {
+    /* background: rgba(255, 255, 255, 0.02); */
+    /* backdrop-filter: blur(5px); */
+    /* border: 1px solid rgba(255, 255, 255, 0.05); */
+    border-radius: 12px;
+    padding: 2rem;
+    opacity: 0; /* GSAP */
+  }
+
+  .visual {
+    height: 300px;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  }
+
+  @media (min-width: 768px) {
+    .visual {
+      height: 400px;
+    }
+  }
+
+  .step-number {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 5rem;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .section-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #ccc;
+  }
+
+  .visual-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+  }
+</style>
+
+<script>
+  //@ts-nocheck
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const sections = document.querySelectorAll(".narrative-section");
+  sections.forEach((section) => {
+    const content = section.querySelector(".content");
+    const visual = section.querySelector(".visual");
+    const node = section.querySelector(".timeline-node");
+    const lineProgress = section.querySelector(".line-progress");
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top center", // When top of section hits center
+        end: "bottom center",
+        toggleActions: "play reverse play reverse",
+        // scrub: 0.5
+      },
+    });
+
+    // 1. Reveal Node
+    tl.fromTo(
+      node,
+      { scale: 0.5, opacity: 0.5 },
+      { scale: 1.2, opacity: 1, duration: 0.3, ease: "back.out(1.7)" },
+    )
+      .addLabel("nodeRevealed")
+      .call(() => node.classList.add("active"), null, "nodeRevealed");
+
+    // 2. Reveal Content & Visual (Staggered)
+    // Content comes from side (depending on align class would be cool, but simple y-up is safer)
+    tl.fromTo(
+      [content, visual],
+      { y: 50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, stagger: 0.2, ease: "power2.out" },
+      "nodeRevealed-=0.1",
+    );
+
+    // 3. Line Progress (Continuous fill effect)
+    // We want the line to fill as we scroll through the section
+    gsap.fromTo(
+      lineProgress,
+      { height: "0%" },
+      {
+        height: "100%",
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top center",
+          end: "bottom center",
+          scrub: true,
+        },
+      },
+    );
+  });
+</script>

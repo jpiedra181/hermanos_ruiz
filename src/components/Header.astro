@@ -1,0 +1,261 @@
+---
+import { useTranslations } from "../i18n/utils";
+
+const { lang = "es" } = Astro.props;
+const t = useTranslations(lang);
+
+const homeLink = `/${lang}/`;
+const servicesLink = `/${lang}/#services`;
+const aboutLink = `/${lang}/#about`;
+const contactLink = `/${lang}/#contact`;
+
+const toggleLang = lang === "es" ? "en" : "es";
+const toggleLabel = lang === "es" ? "EN" : "ES";
+const toggleLink = `/${toggleLang}/`;
+---
+
+<header class="site-header">
+    <div class="container">
+        <div class="logo">
+            <a href={homeLink}>
+                <span class="brand-name">Hermanos Ruiz</span>
+            </a>
+        </div>
+
+        <nav class="main-nav">
+            <ul>
+                <li><a href={servicesLink}>{t("nav.services")}</a></li>
+                <li><a href={aboutLink}>{t("nav.about")}</a></li>
+                <li><a href={contactLink}>{t("nav.contact")}</a></li>
+                <li>
+                    <a href={toggleLink} class="lang-switch">{toggleLabel}</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="cta-container">
+            <a href={contactLink} class="header-cta">{t("nav.appointment")}</a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Navigation Overlay -->
+<div class="mobile-nav">
+    <button class="close-menu-btn">&times;</button>
+    <nav>
+        <ul>
+            <li><a href={homeLink}>{t("nav.home")}</a></li>
+            <li><a href={servicesLink}>{t("nav.services")}</a></li>
+            <li><a href={aboutLink}>{t("nav.about")}</a></li>
+            <li><a href={contactLink}>{t("nav.contact")}</a></li>
+            <li>
+                <a href={toggleLink} class="lang-switch-mobile">{toggleLabel}</a
+                >
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<style>
+    .site-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 100;
+        padding: 1.5rem 0;
+        transition:
+            background-color 0.3s,
+            padding 0.3s;
+    }
+
+    .site-header.scrolled {
+        background-color: rgba(26, 26, 26, 0.95);
+        padding: 1rem 0;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo a {
+        text-decoration: none;
+    }
+
+    .brand-name {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .main-nav ul {
+        display: none;
+        list-style: none;
+        gap: 2rem;
+        padding: 0;
+        margin: 0;
+    }
+
+    .main-nav a {
+        color: #ccc;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: color 0.3s;
+    }
+
+    .main-nav a:hover {
+        color: var(--color-accent);
+    }
+
+    .cta-container {
+        display: none;
+    }
+
+    .header-cta {
+        background-color: var(--color-accent);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background-color 0.3s;
+    }
+
+    .header-cta:hover {
+        background-color: #e67e22;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30px;
+        height: 21px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .mobile-menu-btn span {
+        display: block;
+        width: 100%;
+        height: 3px;
+        background-color: white;
+        border-radius: 3px;
+        transition: all 0.3s;
+    }
+
+    /* Desktop View */
+    @media (min-width: 768px) {
+        .main-nav ul {
+            display: flex;
+        }
+        .cta-container {
+            display: block;
+        }
+        .mobile-menu-btn {
+            display: none;
+        }
+    }
+
+    /* Mobile Nav Overlay */
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100vh;
+        background-color: var(--color-secondary);
+        z-index: 101;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: right 0.4s ease;
+    }
+
+    .mobile-nav.active {
+        right: 0;
+    }
+
+    .mobile-nav ul {
+        list-style: none;
+        padding: 0;
+        text-align: center;
+    }
+
+    .mobile-nav li {
+        margin: 2rem 0;
+    }
+
+    .mobile-nav a {
+        font-size: 2rem;
+        font-family: var(--font-heading);
+        color: white;
+        font-weight: 700;
+    }
+
+    .close-menu-btn {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        background: none;
+        border: none;
+        font-size: 3rem;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    // Sticky Header
+    const header = document.querySelector(".site-header");
+    window.addEventListener("scroll", () => {
+        if (header && window.scrollY > 50) {
+            header.classList.add("scrolled");
+        } else if (header) {
+            header.classList.remove("scrolled");
+        }
+    });
+
+    // Mobile Menu
+    const mobileBtn = document.querySelector(".mobile-menu-btn");
+    const mobileNav = document.querySelector(".mobile-nav");
+    const closeBtn = document.querySelector(".close-menu-btn");
+
+    if (mobileBtn && mobileNav) {
+        mobileBtn.addEventListener("click", () => {
+            mobileNav.classList.add("active");
+        });
+    }
+
+    if (closeBtn && mobileNav) {
+        closeBtn.addEventListener("click", () => {
+            mobileNav.classList.remove("active");
+        });
+    }
+
+    // Close menu when clicking a link
+    if (mobileNav) {
+        mobileNav.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", () => {
+                mobileNav.classList.remove("active");
+            });
+        });
+    }
+</script>

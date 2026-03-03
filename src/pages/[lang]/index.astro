@@ -1,0 +1,211 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Hero from "../../components/Hero.astro";
+import NarrativeSection from "../../components/NarrativeSection.astro";
+import Services from "../../components/Services.astro";
+import About from "../../components/About.astro";
+import Reviews from "../../components/Reviews.astro";
+import Contact from "../../components/Contact.astro";
+import Footer from "../../components/Footer.astro";
+
+import { languages } from "../../i18n/ui";
+import { useTranslations } from "../../i18n/utils";
+
+export function getStaticPaths() {
+    return Object.keys(languages).map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const t = useTranslations(lang as any);
+---
+
+<Layout
+    title="Taller Hermanos Ruiz - Mecánica Transparente en Getafe"
+    lang={lang}
+>
+    <main>
+        <Hero lang={lang} />
+
+        <!-- Narrative Journey -->
+        <NarrativeSection
+            id="journey-start"
+            stepNumber="01"
+            title={t("narrative.01.title")}
+            text={t("narrative.01.text")}
+            align="left"
+            animation="fade"
+        >
+            <div slot="visual" class="visual-content warning-light">
+                <div class="dashboard-icon">⚠️</div>
+                <span>{t("narrative.01.visual")}</span>
+            </div>
+        </NarrativeSection>
+
+        <NarrativeSection
+            id="journey-listen"
+            stepNumber="02"
+            title={t("narrative.02.title")}
+            text={t("narrative.02.text")}
+            align="right"
+            animation="slide"
+        >
+            <div slot="visual" class="visual-content reception">
+                <div class="icon">👂</div>
+                <span>{t("narrative.02.visual")}</span>
+            </div>
+        </NarrativeSection>
+
+        <NarrativeSection
+            id="journey-find"
+            stepNumber="03"
+            title={t("narrative.03.title")}
+            text={t("narrative.03.text")}
+            align="left"
+            animation="lift"
+        >
+            <div slot="visual" class="visual-content lift-up">
+                <div class="car-on-lift">🚗</div>
+                <div class="lift-platform"></div>
+            </div>
+        </NarrativeSection>
+
+        <NarrativeSection
+            id="journey-options"
+            stepNumber="04"
+            title={t("narrative.04.title")}
+            text={t("narrative.04.text")}
+            align="right"
+            animation="fade"
+        >
+            <div slot="visual" class="visual-content quote">
+                <div class="paper-quote">
+                    <span>{t("narrative.04.visual")}</span>
+                    <div class="line"></div>
+                    <div class="line"></div>
+                    <div class="line total"></div>
+                </div>
+            </div>
+        </NarrativeSection>
+
+        <NarrativeSection
+            id="journey-fix"
+            stepNumber="05"
+            title={t("narrative.05.title")}
+            text={t("narrative.05.text")}
+            align="left"
+            animation="slide"
+        >
+            <div slot="visual" class="visual-content working">
+                <div class="sparks">✨</div>
+                <span>{t("narrative.05.visual")}</span>
+            </div>
+        </NarrativeSection>
+
+        <NarrativeSection
+            id="journey-leave"
+            stepNumber="06"
+            title={t("narrative.06.title")}
+            text={t("narrative.06.text")}
+            align="right"
+            animation="slide"
+        >
+            <div slot="visual" class="visual-content departure">
+                <div class="keys">🔑</div>
+                <span>{t("narrative.06.visual")}</span>
+            </div>
+        </NarrativeSection>
+
+        <Services lang={lang} />
+        <About lang={lang} />
+        <Reviews lang={lang} />
+        <Contact lang={lang} />
+    </main>
+    <Footer lang={lang} />
+</Layout>
+
+<style>
+    /* Custom styles for the placeholders in narrative sections */
+    .visual-content {
+        width: 100%;
+        height: 100%;
+        background: #1a1a1a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #555;
+    }
+
+    .dashboard-icon {
+        font-size: 5rem;
+        color: #e74c3c;
+        animation: pulse 2s infinite;
+    }
+    .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .lift-up {
+        position: relative;
+    }
+    .car-on-lift {
+        font-size: 4rem;
+        transform: translateY(20px);
+        transition: transform 1s;
+    }
+    .lift-platform {
+        width: 100px;
+        height: 10px;
+        background: #555;
+        margin-top: 10px;
+    }
+
+    .quote {
+        background: #222;
+    }
+    .paper-quote {
+        background: #fff;
+        padding: 20px;
+        width: 150px;
+        height: 200px;
+        color: #000;
+        font-size: 0.8rem;
+        transform: rotate(-5deg);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+    .line {
+        height: 8px;
+        background: #eee;
+        margin-bottom: 10px;
+        width: 80%;
+    }
+    .line.total {
+        background: var(--color-accent);
+        width: 40%;
+        margin-top: auto;
+    }
+
+    .working .sparks {
+        font-size: 3rem;
+        color: #f1c40f;
+    }
+
+    .departure .keys {
+        font-size: 4rem;
+        color: silver;
+    }
+
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+</style>

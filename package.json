@@ -1,0 +1,20 @@
+{
+  "name": "temp_site",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.16.11",
+    "gsap": "^3.14.2",
+    "leaflet": "^1.9.4",
+    "swiper": "^12.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9"
+  }
+}

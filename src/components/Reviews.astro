@@ -1,0 +1,157 @@
+---
+import { useTranslations } from "../i18n/utils";
+import "swiper/css";
+import "swiper/css/pagination";
+
+const { lang = "es" } = Astro.props;
+const t = useTranslations(lang);
+
+const reviews = [
+    { name: t("reviews.1.author"), text: t("reviews.1.text") },
+    { name: t("reviews.2.author"), text: t("reviews.2.text") },
+    { name: t("reviews.3.author"), text: t("reviews.3.text") },
+    { name: t("reviews.4.author"), text: t("reviews.4.text") },
+    { name: t("reviews.5.author"), text: t("reviews.5.text") },
+    { name: t("reviews.6.author"), text: t("reviews.6.text") },
+];
+---
+
+<section class="reviews-section">
+    <div class="container">
+        <h2 class="section-title">{t("reviews.title")}</h2>
+
+        <div class="swiper reviews-swiper">
+            <div class="swiper-wrapper">
+                {
+                    reviews.map((review) => (
+                        <div class="swiper-slide">
+                            <div class="review-card">
+                                <p class="review-text">"{review.text}"</p>
+                                <p class="review-author">— {review.name}</p>
+                            </div>
+                        </div>
+                    ))
+                }
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+
+<script>
+    import Swiper from "swiper";
+    import { Pagination, Autoplay } from "swiper/modules";
+
+    document.addEventListener("astro:page-load", () => {
+        const swiper = new Swiper(".reviews-swiper", {
+            modules: [Pagination, Autoplay],
+            slidesPerView: 1,
+            spaceBetween: 20,
+            autoHeight: false,
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                },
+                1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                },
+            },
+        });
+    });
+
+    // Fallback for non-ViewTransitions if needed, or if script runs before page load
+    const swiperEl = document.querySelector(".reviews-swiper");
+    if (swiperEl && !(swiperEl as any).swiper) {
+        new Swiper(".reviews-swiper", {
+            modules: [Pagination, Autoplay],
+            slidesPerView: 1,
+            spaceBetween: 20,
+            autoHeight: false,
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                },
+                1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                },
+            },
+        });
+    }
+</script>
+
+<style>
+    .reviews-section {
+        padding: 6rem 0;
+        background-color: #151515;
+    }
+    .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 2rem;
+        color: #fff;
+    }
+
+    .reviews-swiper {
+        padding-bottom: 3rem; /* Space for pagination */
+    }
+
+    .swiper-slide {
+        height: auto;
+    }
+
+    .review-card {
+        background: #252525;
+        padding: 2rem;
+        border-radius: 8px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        /* align-items: stretch; */
+    }
+
+    .review-text {
+        font-style: italic;
+        margin-bottom: 1.5rem;
+        color: #ddd;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .review-author {
+        color: var(--color-accent);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    /* Swiper Pagination Customization */
+    :global(.swiper-pagination-bullet) {
+        background: #555;
+        opacity: 1;
+    }
+    :global(.swiper-pagination-bullet-active) {
+        background: var(--color-accent, #e63946);
+    }
+</style>

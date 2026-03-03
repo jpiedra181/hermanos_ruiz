@@ -1,0 +1,249 @@
+---
+import { useTranslations } from "../i18n/utils";
+import garageOld from "../assets/about/garage_old.webp";
+import garageNew from "../assets/about/garage_new.webp";
+
+const { lang = "es" } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section id="about" class="about-section">
+  <div class="container">
+    <div class="about-content">
+      <h2>{t("about.title")}</h2>
+      <p>{t("about.text1")}</p>
+      <p>{t("about.text2")}</p>
+    </div>
+
+    <div class="about-visuals">
+      <div class="slider-container">
+        <div class="image-wrapper after">
+          <img src={garageNew.src} alt="New Garage" />
+          <span class="label">{t("about.new")}</span>
+        </div>
+        <div class="image-wrapper before">
+          <img src={garageOld.src} alt="Old Garage" />
+          <span class="label">{t("about.old")}</span>
+        </div>
+        <div class="slider-handle">
+          <div class="handle-line"></div>
+          <div class="handle-circle">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path d="m9 18-6-6 6-6"></path><path d="m15 18 6-6-6-6"
+              ></path></svg
+            >
+          </div>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="50"
+          class="slider-input"
+          aria-label="Before After Slider"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-section {
+    padding: 8rem 0;
+    background-color: var(--color-secondary);
+  }
+
+  .container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .container {
+      grid-template-columns: 1fr 1.5fr; /* Visuals take more space */
+    }
+  }
+
+  h2 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: var(--color-accent);
+  }
+
+  p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    color: #ccc;
+  }
+
+  /* Slider Styles */
+  .slider-container {
+    position: relative;
+    width: 100%;
+    height: 500px; /* Bigger height */
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border: 4px solid #333;
+  }
+
+  .image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .image-wrapper.before {
+    width: 50%; /* Initial state */
+    overflow: hidden;
+    z-index: 2;
+  }
+
+  .image-wrapper.before img {
+    width: var(--slider-width);
+    max-width: none;
+  }
+
+  .label {
+    position: absolute;
+    bottom: 20px;
+    padding: 5px 15px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .before .label {
+    left: 20px;
+  }
+  .after .label {
+    right: 20px;
+    z-index: 1;
+  }
+
+  /* Handle */
+  .slider-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    background: white;
+    z-index: 3;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .handle-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .slider-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: col-resize;
+    z-index: 4;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .slider-container {
+      height: 300px;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Animation for content
+  gsap.from(".about-content", {
+    scrollTrigger: {
+      trigger: ".about-section",
+      start: "top 70%",
+    },
+    x: -50,
+    opacity: 0,
+    duration: 1,
+    ease: "power2.out",
+  });
+
+  gsap.from(".slider-container", {
+    scrollTrigger: {
+      trigger: ".about-section",
+      start: "top 70%",
+    },
+    y: 50,
+    opacity: 0,
+    duration: 1,
+    ease: "power2.out",
+    delay: 0.2,
+  });
+
+  // Slider Logic
+  const sliders = document.querySelectorAll(".slider-container");
+
+  sliders.forEach((container) => {
+    const input = container.querySelector(".slider-input") as HTMLInputElement;
+    const beforeImage = container.querySelector(".before") as HTMLElement;
+    const handle = container.querySelector(".slider-handle") as HTMLElement;
+
+    const updateSlider = () => {
+      const value = Number(input.value);
+      const containerWidth = container.getBoundingClientRect().width;
+
+      beforeImage.style.setProperty("--slider-width", `${containerWidth}px`);
+      beforeImage.style.width = `${value}%`;
+      handle.style.left = `${value}%`;
+    };
+
+    input.addEventListener("input", updateSlider);
+    // Initialize
+    window.addEventListener("resize", updateSlider);
+    updateSlider();
+  });
+</script>
