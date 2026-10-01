@@ -1,0 +1,95 @@
+---
+import { useTranslations, type Lang } from "../i18n/utils";
+
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+const words = [
+  t("services.mechanic"),
+  t("services.itv"),
+  t("services.brakes"),
+  t("services.diagnosis"),
+  t("services.oil"),
+  t("services.tires"),
+];
+---
+
+<div class="marquee" aria-hidden="true" data-marquee>
+  {
+    [0, 1].map((row) => (
+      <div class:list={["marquee__row", { "marquee__row--alt": row === 1 }]}>
+        <div class="marquee__track" data-marquee-track={row}>
+          {[...words, ...words].map((w, i) => (
+            <span class:list={["marquee__item", { "is-outline": (i + row) % 2 === 1 }]}>
+              {w}
+              <span class="marquee__dot" />
+            </span>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .marquee {
+    position: relative;
+    padding-block: clamp(3rem, 8vw, 7rem) clamp(2rem, 5vw, 4rem);
+    overflow: hidden;
+    background: var(--ink);
+  }
+
+  .marquee__row + .marquee__row {
+    margin-top: clamp(0.25rem, 1vw, 1rem);
+  }
+
+  .marquee__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .marquee__row--alt .marquee__track {
+    transform: translateX(-50%);
+  }
+
+  .marquee__item {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 3rem);
+    padding-right: clamp(1.25rem, 3vw, 3rem);
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 9vw, 9rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    color: var(--bone);
+  }
+
+  .marquee__item.is-outline {
+    font-style: italic;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-strong);
+  }
+
+  .marquee__dot {
+    width: clamp(0.5rem, 1vw, 0.875rem);
+    height: clamp(0.5rem, 1vw, 0.875rem);
+    border-radius: 50%;
+    background: var(--copper);
+  }
+</style>
+
+<script>
+  import { gsap, reducedMotion } from "../scripts/motion";
+
+  const root = document.querySelector<HTMLElement>("[data-marquee]");
+  if (root && !reducedMotion()) {
+    const [a, b] = gsap.utils.toArray<HTMLElement>("[data-marquee-track]", root);
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: { trigger: root, start: "top bottom", end: "bottom top", scrub: 0.6 },
+    });
+    tl.fromTo(a, { xPercent: 0 }, { xPercent: -28 }, 0).fromTo(b, { xPercent: -50 }, { xPercent: -22 }, 0);
+  }
+</script>

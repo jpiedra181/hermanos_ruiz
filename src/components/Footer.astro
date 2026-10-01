@@ -1,91 +1,283 @@
 ---
-import { useTranslations } from "../i18n/utils";
+import { useTranslations, type Lang } from "../i18n/utils";
 
-const { lang = "es" } = Astro.props;
+const { lang } = Astro.props as { lang: Lang };
 const t = useTranslations(lang);
-const currentYear = new Date().getFullYear();
+const year = new Date().getFullYear();
 
-const homeLink = `/${lang}/#hero`;
-const servicesLink = `/${lang}/#services`;
-const aboutLink = `/${lang}/#about`;
-const contactLink = `/${lang}/#contact`;
+const links = [
+  { href: "#top", label: t("nav.home") },
+  { href: "#services", label: t("nav.services") },
+  { href: "#process", label: t("nav.process") },
+  { href: "#about", label: t("nav.about") },
+  { href: "#contact", label: t("nav.contact") },
+];
+const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+const wordmark = "Hermanos Ruiz";
 ---
 
-<footer>
+<footer class="ftr" data-footer>
   <div class="container">
-    <div class="footer-content">
-      <div class="brand">
-        <h3>Taller Hermanos Ruiz</h3>
+    <div class="ftr__cta">
+      <h2 class="ftr__title" data-reveal="lines">
+        {t("footer.cta.title.1")} <em>{t("footer.cta.title.2")}</em>
+      </h2>
+      <div class="ftr__cta-side" data-reveal="fade" data-delay="0.2">
+        <p>{t("footer.cta.text")}</p>
+        <a class="btn btn--primary" href="#contact" data-magnetic="0.25">
+          {t("nav.appointment")}
+          <span class="btn__icon" aria-hidden="true" set:html={arrow + arrow} />
+        </a>
+      </div>
+    </div>
+
+    <div class="ftr__grid">
+      <div class="ftr__brand">
+        <span class="ftr__mark" aria-hidden="true">HR</span>
         <p>{t("footer.slogan")}</p>
       </div>
-      <div class="links">
-        <a href={homeLink}>{t("nav.home")}</a>
-        <a href={servicesLink}>{t("nav.services")}</a>
-        <a href={aboutLink}>{t("nav.about")}</a>
-        <a href={contactLink}>{t("nav.contact")}</a>
+
+      <nav class="ftr__col" aria-label={t("footer.nav")}>
+        <h3 class="ftr__heading">{t("footer.nav")}</h3>
+        <ul>
+          {
+            links.map((l) => (
+              <li>
+                <a class="link-underline" href={l.href}>
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="ftr__col">
+        <h3 class="ftr__heading">{t("footer.visit")}</h3>
+        <address>
+          {t("contact.address.value")}<br />
+          <a class="link-underline" href="tel:+34916820000">91 682 00 00</a>
+        </address>
+        <p class="ftr__hours">
+          {t("contact.schedule.week")}<br />
+          {t("contact.schedule.saturday")}
+        </p>
+      </div>
+
+      <div class="ftr__col ftr__col--end">
+        <a class="ftr__top" href="#top">
+          <span>{t("footer.top")}</span>
+          <span class="ftr__top-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
+          </span>
+        </a>
       </div>
     </div>
-    <div class="legal">
-      <p>&copy; {currentYear} Taller Hermanos Ruiz. {t("footer.rights")}</p>
-      <a href="#">{t("footer.privacy")}</a>
-    </div>
+  </div>
+
+  <div class="ftr__word" aria-hidden="true" data-wordmark>
+    {[...wordmark].map((c) => <span class="ftr__char">{c === " " ? " " : c}</span>)}
+  </div>
+
+  <div class="container ftr__legal">
+    <p>&copy; {year} Taller Hermanos Ruiz. {t("footer.rights")}</p>
+    <a class="link-underline" href="#">{t("footer.privacy")}</a>
   </div>
 </footer>
 
 <style>
-  footer {
-    background-color: black;
-    padding: 4rem 0 2rem;
-    border-top: 1px solid #333;
-    font-size: 0.9rem;
-    color: #888;
+  .ftr {
+    position: relative;
+    padding-top: var(--section);
+    background: var(--ink);
+    border-top: 1px solid var(--line);
+    overflow: clip;
   }
 
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-bottom: 3rem;
+  .ftr__cta {
+    display: grid;
+    gap: 2.5rem;
+    padding-bottom: clamp(4rem, 9vw, 8rem);
+    border-bottom: 1px solid var(--line);
   }
 
-  @media (min-width: 768px) {
-    .footer-content {
-      flex-direction: row;
-      justify-content: space-between;
+  .ftr__title {
+    font-size: var(--fs-h2);
+    max-width: 14ch;
+  }
+
+  .ftr__title em {
+    color: var(--copper);
+  }
+
+  .ftr__cta-side {
+    display: grid;
+    gap: 1.75rem;
+    justify-items: start;
+    font-size: var(--fs-lead);
+    color: var(--bone-2);
+  }
+
+  @media (min-width: 1024px) {
+    .ftr__cta {
+      grid-template-columns: 1.6fr 1fr;
+      align-items: end;
+    }
+
+    .ftr__cta-side {
+      justify-self: end;
     }
   }
 
-  h3 {
-    color: white;
-    margin-bottom: 0.5rem;
+  .ftr__grid {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: clamp(3rem, 6vw, 5rem);
   }
 
-  .links {
-    display: flex;
-    gap: 1.5rem;
+  @media (min-width: 768px) {
+    .ftr__grid {
+      grid-template-columns: 1.4fr 1fr 1fr auto;
+    }
   }
 
-  .links a {
-    color: #ccc;
-    transition: color 0.3s;
-  }
-
-  .links a:hover {
-    color: var(--color-accent);
-  }
-
-  .legal {
+  .ftr__brand {
     display: flex;
     flex-direction: column;
+    gap: 1.25rem;
+    color: var(--bone-2);
+  }
+
+  .ftr__mark {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.4rem;
+  }
+
+  .ftr__heading {
+    margin-bottom: 1.25rem;
+    font-family: var(--font-sans);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .ftr__col ul {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .ftr__col li a {
+    display: inline-block;
+    padding-block: 0.3rem;
+  }
+
+  .ftr__col address {
+    font-style: normal;
+    line-height: 1.8;
+  }
+
+  .ftr__hours {
+    margin-top: 1rem;
+    font-size: var(--fs-small);
+    color: var(--bone-2);
+    line-height: 1.8;
+  }
+
+  .ftr__col--end {
+    align-self: start;
+  }
+
+  .ftr__top {
+    display: inline-flex;
+    align-items: center;
     gap: 1rem;
-    border-top: 1px solid #222;
-    padding-top: 2rem;
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
   }
 
-  @media (min-width: 768px) {
-    .legal {
-      flex-direction: row;
-      justify-content: space-between;
-    }
+  .ftr__top-icon {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition: background-color 0.4s, color 0.4s, border-color 0.4s;
+  }
+
+  .ftr__top-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .ftr__top:hover .ftr__top-icon {
+    background: var(--copper);
+    border-color: var(--copper);
+    color: var(--ink);
+  }
+
+  .ftr__top:hover .ftr__top-icon svg {
+    transform: translateY(-3px);
+  }
+
+  .ftr__word {
+    display: flex;
+    justify-content: center;
+    padding-inline: 1vw;
+    font-family: var(--font-display);
+    font-size: 18.6vw;
+    line-height: 0.78;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    color: var(--bone);
+    overflow: hidden;
+    padding-top: 0.06em;
+    user-select: none;
+  }
+
+  .ftr__char {
+    display: inline-block;
+  }
+
+  .ftr__char:nth-child(n + 10) {
+    font-style: italic;
+    color: var(--copper);
+  }
+
+  .ftr__legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 2rem max(2rem, env(safe-area-inset-bottom));
+    font-size: var(--fs-small);
+    color: var(--muted);
   }
 </style>
+
+<script>
+  import { gsap, reducedMotion } from "../scripts/motion";
+
+  const word = document.querySelector<HTMLElement>("[data-wordmark]");
+  if (word && !reducedMotion()) {
+    gsap.from(word.children, {
+      yPercent: 100,
+      ease: "expo.out",
+      duration: 1.6,
+      stagger: 0.04,
+      scrollTrigger: { trigger: word, start: "top 95%", once: true },
+    });
+  }
+</script>

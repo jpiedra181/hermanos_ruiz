@@ -1,424 +1,406 @@
 ---
-//@ts-nocheck
-import { useTranslations } from "../i18n/utils";
+import { Image } from "astro:assets";
+import { useTranslations, type Lang } from "../i18n/utils";
+import mechanic from "../assets/services/mechanic.jpg";
+import itv from "../assets/services/itv.jpg";
+import brakes from "../assets/services/brakes.jpg";
+import diagnosis from "../assets/services/diagnosis.jpg";
+import oil from "../assets/services/oil.jpg";
+import tires from "../assets/services/tires.jpg";
 
-const { lang = "es" } = Astro.props;
+const { lang } = Astro.props as { lang: Lang };
 const t = useTranslations(lang);
+
+const icon = (body: string) =>
+  `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 
 const services = [
   {
-    id: "01",
-    name: t("services.mechanic"),
-    desc: t("services.mechanic.desc"),
-    svg: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M38 10l-4 4-4-4 4-4 4 4z"/>
-      <path d="M34 14L20 28"/>
-      <circle cx="14" cy="34" r="6"/>
-      <path d="M14 28v-4M14 40v4M8 34H4M24 34h4"/>
-    </svg>`,
+    key: "mechanic",
+    img: mechanic,
+    svg: icon(`<path d="M38 10l-4 4-4-4 4-4 4 4z"/><path d="M34 14L20 28"/><circle cx="14" cy="34" r="6"/><path d="M14 28v-4M14 40v4M8 34H4M24 34h4"/>`),
   },
   {
-    id: "02",
-    name: t("services.itv"),
-    desc: t("services.itv.desc"),
-    svg: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="6" y="10" width="36" height="28" rx="3"/>
-      <path d="M16 26l5 5 11-12"/>
-      <path d="M6 18h36"/>
-    </svg>`,
+    key: "itv",
+    img: itv,
+    svg: icon(`<rect x="6" y="10" width="36" height="28" rx="3"/><path d="M16 26l5 5 11-12"/><path d="M6 18h36"/>`),
   },
   {
-    id: "03",
-    name: t("services.brakes"),
-    desc: t("services.brakes.desc"),
-    svg: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="24" cy="24" r="16"/>
-      <circle cx="24" cy="24" r="6"/>
-      <path d="M24 8v5M24 35v5M8 24h5M35 24h5"/>
-      <path d="M13.4 13.4l3.5 3.5M31.1 31.1l3.5 3.5"/>
-    </svg>`,
+    key: "brakes",
+    img: brakes,
+    svg: icon(`<circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="6"/><path d="M24 8v5M24 35v5M8 24h5M35 24h5"/><path d="M13.4 13.4l3.5 3.5M31.1 31.1l3.5 3.5"/>`),
   },
   {
-    id: "04",
-    name: t("services.diagnosis"),
-    desc: t("services.diagnosis.desc"),
-    svg: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="8" y="12" width="32" height="22" rx="2"/>
-      <path d="M16 38h16M24 34v4"/>
-      <path d="M14 24h4l3 5 4-9 3 5 4-1h4"/>
-    </svg>`,
+    key: "diagnosis",
+    img: diagnosis,
+    svg: icon(`<rect x="8" y="12" width="32" height="22" rx="2"/><path d="M16 38h16M24 34v4"/><path d="M14 24h4l3 5 4-9 3 5 4-1h4"/>`),
   },
   {
-    id: "05",
-    name: t("services.oil"),
-    desc: t("services.oil.desc"),
-    svg: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M18 8h12v6l4 4v18a4 4 0 01-4 4H18a4 4 0 01-4-4V18l4-4V8z"/>
-      <path d="M14 22h20"/>
-      <path d="M24 8V4M30 6l6-3"/>
-      <circle cx="24" cy="32" r="3"/>
-    </svg>`,
+    key: "oil",
+    img: oil,
+    svg: icon(`<path d="M18 8h12v6l4 4v18a4 4 0 01-4 4H18a4 4 0 01-4-4V18l4-4V8z"/><path d="M14 22h20"/><path d="M24 8V4"/><circle cx="24" cy="32" r="3"/>`),
   },
   {
-    id: "06",
-    name: t("services.tires"),
-    desc: t("services.tires.desc"),
-    svg: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="24" cy="24" r="17"/>
-      <circle cx="24" cy="24" r="8"/>
-      <path d="M24 7v4M24 37v4M7 24h4M37 24h4"/>
-      <path d="M13 13l3 3M32 32l3 3M13 35l3-3M32 16l3-3"/>
-    </svg>`,
+    key: "tires",
+    img: tires,
+    svg: icon(`<circle cx="24" cy="24" r="17"/><circle cx="24" cy="24" r="8"/><path d="M24 7v4M24 37v4M7 24h4M37 24h4"/><path d="M13 13l3 3M32 32l3 3M13 35l3-3M32 16l3-3"/>`),
   },
-];
+] as const;
+
+const items = services.map((s) => ({
+  ...s,
+  name: t(`services.${s.key}` as "services.mechanic"),
+  desc: t(`services.${s.key}.desc` as "services.mechanic.desc"),
+}));
+const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
 ---
 
-<section id="services" class="services-section">
+<section id="services" class="services" aria-labelledby="services-title" data-services>
+  <div class="container">
+    <header class="services__head">
+      <p class="eyebrow" data-reveal="fade">{t("services.surtitle")}</p>
+      <h2 class="section-title" id="services-title" data-reveal="lines">
+        {t("services.title.1")} <em>{t("services.title.2")}</em>
+      </h2>
+      <p class="services__intro" data-reveal="fade" data-delay="0.15">{t("services.intro")}</p>
+    </header>
 
-  <!-- Grid background texture -->
-  <div class="services-bg" aria-hidden="true">
-    <div class="services-bg__grid"></div>
+    <ol class="svc-list" data-svc-list>
+      {
+        items.map((s, i) => (
+          <li class="svc" data-svc={i}>
+            <span class="svc__num" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span class="svc__icon" aria-hidden="true" set:html={s.svg} />
+            <h3 class="svc__name">{s.name}</h3>
+            <p class="svc__desc">{s.desc}</p>
+            <a
+              class="svc__link"
+              href="#contact"
+              data-service={s.key}
+              aria-label={`${t("services.cta")}: ${s.name}`}
+            >
+              <span class="svc__arrow" aria-hidden="true" set:html={arrow} />
+            </a>
+          </li>
+        ))
+      }
+    </ol>
   </div>
 
-  <div class="container">
-
-    <!-- Header -->
-    <div class="services-header">
-      <div class="services-label">
-        <span class="services-label__line"></span>
-        <span class="services-label__text">{t("services.surtitle")}</span>
-      </div>
-      <h2 class="services-title">{t("services.title")}</h2>
-    </div>
-
-    <!-- Grid -->
-    <div class="services-grid">
-      {services.map((service, i) => (
-        <div class="flip-card" tabindex="0" aria-label={service.name}>
-          <div class="flip-card__inner">
-
-            <!-- Front -->
-            <div class="flip-card__front" aria-hidden="true">
-              <span class="flip-card__num">{service.id}</span>
-              <div class="flip-card__icon" set:html={service.svg} />
-              <h3 class="flip-card__name">{service.name}</h3>
-              <div class="flip-card__hint">
-                <span>Ver más</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </div>
-            </div>
-
-            <!-- Back -->
-            <div class="flip-card__back">
-              <span class="flip-card__num">{service.id}</span>
-              <h3 class="flip-card__name">{service.name}</h3>
-              <p class="flip-card__desc">{service.desc}</p>
-              <div class="flip-card__back-bar"></div>
-            </div>
-
+  <div class="svc-preview" aria-hidden="true" data-svc-preview>
+    <div class="svc-preview__inner">
+      {
+        items.map((s, i) => (
+          <div class="svc-preview__item" data-preview={i}>
+            <Image src={s.img} alt="" widths={[400, 720]} sizes="22rem" loading="lazy" decoding="async" />
           </div>
-        </div>
-      ))}
+        ))
+      }
     </div>
-
   </div>
 </section>
 
 <style>
-  /* ── Section ─────────────────────────────────────────── */
-  .services-section {
-    padding: 8rem 0;
-    background-color: var(--color-secondary);
+  .services {
     position: relative;
-    overflow: hidden;
+    padding-block: var(--section);
+    background: var(--ink);
+    overflow: clip;
   }
 
-  /* Grid texture */
-  .services-bg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .services-bg__grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 80%);
-  }
-
-  /* ── Header ──────────────────────────────────────────── */
-  .services-header {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 4rem;
-  }
-
-  .services-label {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-
-  .services-label__line {
-    display: block;
-    width: 36px;
-    height: 2px;
-    background: var(--color-accent);
-    flex-shrink: 0;
-  }
-
-  .services-label__text {
-    font-family: var(--font-heading);
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.3em;
-    color: var(--color-accent);
-  }
-
-  .services-title {
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    color: var(--color-text);
-    margin: 0;
-  }
-
-  /* ── Grid ────────────────────────────────────────────── */
-  .services-grid {
-    position: relative;
-    z-index: 1;
+  .services__head {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    margin-bottom: clamp(3rem, 7vw, 5.5rem);
   }
 
-  /* ── Flip card shell ─────────────────────────────────── */
-  .flip-card {
-    perspective: 1200px;
-    height: 300px;
-    cursor: pointer;
-    outline: none;
-    border-radius: 36px;
+  .services__intro {
+    max-width: 40ch;
+    font-size: var(--fs-lead);
+    color: var(--bone-2);
   }
 
-  .flip-card__inner {
+  @media (min-width: 1024px) {
+    .services__head {
+      grid-template-columns: 1.4fr 1fr;
+      align-items: end;
+      column-gap: 4rem;
+    }
+
+    .services__head .eyebrow {
+      grid-column: 1 / -1;
+    }
+
+    .services__intro {
+      justify-self: end;
+      padding-bottom: 0.75rem;
+    }
+  }
+
+  /* ── List ──────────────────────────────────────────── */
+  .svc-list {
+    border-top: 1px solid var(--line);
+  }
+
+  .svc {
     position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transition: transform 0.65s cubic-bezier(0.45, 0, 0.15, 1);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "num icon link"
+      "name name name"
+      "desc desc desc";
+    align-items: center;
+    column-gap: 1rem;
+    padding-block: 1.75rem;
+    border-bottom: 1px solid var(--line);
+    isolation: isolate;
   }
 
-  .flip-card:hover .flip-card__inner,
-  .flip-card:focus-within .flip-card__inner {
-    transform: rotateY(180deg);
-  }
-
-  /* ── Front & Back shared ─────────────────────────────── */
-  .flip-card__front,
-  .flip-card__back {
+  .svc::before {
+    content: "";
     position: absolute;
-    inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    border: 1px solid rgba(255,255,255,0.06);
-    padding: 2.25rem 2rem;
-    display: flex;
-    flex-direction: column;
-    border-radius: 36px;
-  }
-
-  /* ── Front ───────────────────────────────────────────── */
-  .flip-card__front {
-    background: var(--color-primary);
-    justify-content: flex-end;
-    transition: border-color 0.3s ease;
-  }
-
-  .flip-card:hover .flip-card__front {
-    border-color: var(--color-accent);
-  }
-
-  /* Accent left border that grows in */
-  .flip-card__front::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 20%;
-    bottom: 20%;
-    width: 2px;
-    background: var(--color-accent);
-    border-radius: 0 2px 2px 0;
+    inset: 0 calc(var(--gutter) * -1);
+    z-index: -1;
+    background: var(--ink-3);
     transform: scaleY(0);
     transform-origin: bottom;
-    transition: transform 0.4s ease;
+    transition: transform 0.7s var(--ease-out);
   }
 
-  .flip-card:hover .flip-card__front::before {
-    transform: scaleY(1);
-  }
-
-  .flip-card__num {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.75rem;
-    font-family: var(--font-heading);
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: var(--color-accent);
-  }
-
-  .flip-card__icon {
-    width: 52px;
-    height: 52px;
-    color: var(--color-text);
-    margin-bottom: 1.25rem;
-    flex-shrink: 0;
-    transition: color 0.3s ease;
-  }
-
-  .flip-card:hover .flip-card__icon {
-    color: var(--color-accent);
-  }
-
-  .flip-card__name {
-    font-family: var(--font-heading);
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0 0 0.75rem 0;
-    line-height: 1.2;
-  }
-
-  .flip-card__hint {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.7rem;
+  .svc__num {
+    grid-area: num;
+    font-size: var(--fs-label);
     font-weight: 600;
-    letter-spacing: 0.1em;
-    color: var(--color-accent);
-    text-transform: uppercase;
-    margin-top: auto;
+    letter-spacing: 0.22em;
+    color: var(--copper);
   }
 
-  /* ── Back ────────────────────────────────────────────── */
-  .flip-card__back {
-    background: var(--color-accent);
-    transform: rotateY(180deg);
-    justify-content: flex-end;
-    border-color: var(--color-accent);
+  .svc__icon {
+    grid-area: icon;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--bone-2);
+    transition: color 0.5s, transform 0.8s var(--ease-out);
   }
 
-  .flip-card__back .flip-card__num {
-    color: rgba(255,255,255,0.45);
+  .svc__name {
+    grid-area: name;
+    margin-top: 1.25rem;
+    font-size: clamp(2.25rem, 4.6vw, 4.5rem);
+    line-height: 1;
+    transition: transform 0.8s var(--ease-out), color 0.5s;
   }
 
-  .flip-card__back .flip-card__name {
-    color: #fff;
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
+  .svc__desc {
+    grid-area: desc;
+    margin-top: 0.875rem;
+    max-width: 38ch;
+    color: var(--bone-2);
   }
 
-  .flip-card__desc {
-    font-size: 0.9rem;
-    line-height: 1.7;
-    color: rgba(255,255,255,0.85);
-    margin: 0;
+  .svc__link {
+    grid-area: link;
+    justify-self: end;
+    border-radius: 50%;
   }
 
-  .flip-card__back-bar {
-    margin-top: 1.5rem;
-    height: 1px;
-    background: rgba(255,255,255,0.3);
-    width: 40px;
+  .svc__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
   }
 
-  /* ── Responsive ──────────────────────────────────────── */
-  @media (max-width: 900px) {
-    .services-grid {
-      grid-template-columns: repeat(2, 1fr);
+  .svc__link:focus-visible {
+    outline: none;
+  }
+
+  .svc:has(.svc__link:focus-visible) {
+    outline: 2px solid var(--copper);
+    outline-offset: 4px;
+  }
+
+  .svc__arrow {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    transition: background-color 0.5s, border-color 0.5s, color 0.5s;
+  }
+
+  .svc__arrow :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  @media (min-width: 768px) {
+    .svc {
+      grid-template-columns: 4rem 3rem minmax(0, 1.3fr) minmax(0, 1fr) auto;
+      grid-template-areas: "num icon name desc link";
+      column-gap: clamp(1rem, 2.5vw, 2.5rem);
+      padding-block: clamp(1.75rem, 3vw, 2.75rem);
+    }
+
+    .svc__name,
+    .svc__desc {
+      margin-top: 0;
     }
   }
 
-  @media (max-width: 560px) {
-    .services-grid {
-      grid-template-columns: 1fr;
+  @media (hover: hover) and (pointer: fine) {
+    .svc:hover::before {
+      transform: scaleY(1);
     }
 
-    /* On mobile: skip the flip, show both stacked */
-    .flip-card {
-      height: auto;
-      cursor: default;
+    .svc:hover .svc__name {
+      transform: translateX(1rem);
+      color: var(--copper);
     }
 
-    .flip-card__inner {
-      transform: none !important;
-      transform-style: flat;
+    .svc:hover .svc__icon {
+      color: var(--copper);
+      transform: rotate(-12deg) scale(1.08);
     }
 
-    .flip-card__front {
-      display: none;
+    .svc:hover .svc__arrow {
+      background: var(--copper);
+      border-color: var(--copper);
+      color: var(--ink);
     }
 
-    .flip-card__back {
-      position: static;
+    .svc:hover .svc__arrow :global(svg) {
+      transform: rotate(45deg);
+    }
+  }
+
+  /* ── Cursor preview ────────────────────────────────── */
+  .svc-preview {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+    .svc-preview {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 5;
+      width: 22rem;
+      aspect-ratio: 16 / 10;
+      margin: -6.875rem 0 0 -11rem;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .svc-preview__inner {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: var(--radius);
+      opacity: 0;
+      transform: scale(0.6);
+      transition:
+        opacity 0.4s var(--ease-out),
+        transform 0.6s var(--ease-out);
+    }
+
+    .svc-preview.is-visible .svc-preview__inner {
+      opacity: 1;
       transform: none;
-      backface-visibility: visible;
-      -webkit-backface-visibility: visible;
     }
+  }
 
-    .services-section {
-      padding: 5rem 0;
-    }
+  .svc-preview__item {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 0.7s var(--ease-in-out);
+  }
+
+  .svc-preview__item.is-active {
+    clip-path: inset(0 0 0 0);
+    z-index: 1;
+  }
+
+  .svc-preview__item :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.15);
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .svc-preview__item.is-active :global(img) {
+    transform: scale(1);
   }
 </style>
 
 <script>
-  import { gsap } from "gsap";
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  import { gsap, reducedMotion, finePointer } from "../scripts/motion";
 
-  gsap.registerPlugin(ScrollTrigger);
+  const root = document.querySelector<HTMLElement>("[data-services]");
+  if (root) {
+    const rows = gsap.utils.toArray<HTMLElement>("[data-svc]", root);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // Set initial states explicitly — no reliance on CSS classes
-    gsap.set(".services-header", { opacity: 0, y: 40 });
-    gsap.set(".flip-card", { opacity: 0, y: 50 });
-
-    gsap.to(".services-header", {
-      scrollTrigger: {
-        trigger: ".services-header",
-        start: "top 85%",
-        once: true,
-      },
-      opacity: 1,
-      y: 0,
-      duration: 0.9,
-      ease: "power3.out",
+    // Pick the service in the booking form when a row is chosen.
+    root.querySelectorAll<HTMLAnchorElement>("[data-service]").forEach((link) => {
+      link.addEventListener("click", () => {
+        const select = document.querySelector<HTMLSelectElement>("#f-service");
+        if (!select) return;
+        select.value = link.dataset.service!;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
     });
 
-    gsap.to(".flip-card", {
-      scrollTrigger: {
-        trigger: ".services-grid",
-        start: "top 80%",
-        once: true,
-      },
-      opacity: 1,
-      y: 0,
-      duration: 0.7,
-      stagger: 0.1,
-      ease: "power2.out",
-    });
-  });
+    if (!reducedMotion()) {
+      gsap.from(rows, {
+        y: 40,
+        autoAlpha: 0,
+        duration: 1.2,
+        ease: "expo.out",
+        stagger: 0.07,
+        scrollTrigger: { trigger: root.querySelector("[data-svc-list]"), start: "top 85%", once: true },
+      });
+    }
+
+    const preview = root.querySelector<HTMLElement>("[data-svc-preview]");
+    if (preview && finePointer()) {
+      const items = gsap.utils.toArray<HTMLElement>("[data-preview]", preview);
+      const xTo = gsap.quickTo(preview, "x", { duration: 0.7, ease: "power3.out" });
+      const yTo = gsap.quickTo(preview, "y", { duration: 0.7, ease: "power3.out" });
+      const rTo = gsap.quickTo(preview, "rotation", { duration: 0.9, ease: "power3.out" });
+      let lastX = 0;
+
+      const move = (e: PointerEvent) => {
+        const r = root.getBoundingClientRect();
+        const x = e.clientX - r.left;
+        xTo(x);
+        yTo(e.clientY - r.top);
+        if (!reducedMotion()) rTo(gsap.utils.clamp(-8, 8, (x - lastX) * 0.4));
+        lastX = x;
+      };
+
+      rows.forEach((row, i) => {
+        row.addEventListener("pointerenter", (e) => {
+          items.forEach((it, k) => it.classList.toggle("is-active", k === i));
+          preview.classList.add("is-visible");
+          const r = root.getBoundingClientRect();
+          if (!preview.dataset.placed) {
+            gsap.set(preview, { x: e.clientX - r.left, y: e.clientY - r.top });
+            preview.dataset.placed = "1";
+          }
+        });
+      });
+      root.querySelector("[data-svc-list]")?.addEventListener("pointerleave", () => {
+        preview.classList.remove("is-visible");
+        rTo(0);
+      });
+      root.addEventListener("pointermove", move);
+    }
+  }
 </script>

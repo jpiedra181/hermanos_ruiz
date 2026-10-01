@@ -1,0 +1,600 @@
+---
+/**
+ * Line-art illustrations for the six process steps.
+ * Animations only run while an ancestor carries `.is-active`.
+ */
+interface Props {
+  n: number;
+  label: string;
+}
+
+const { n, label } = Astro.props;
+const uid = `sc${n}-${Math.random().toString(36).slice(2, 8)}`;
+
+// ── Scene 1: tachometer geometry
+const cx = 240;
+const cy = 210;
+const R = 150;
+const polar = (deg: number, r: number) => {
+  const a = (deg * Math.PI) / 180;
+  return [+(cx + r * Math.cos(a)).toFixed(2), +(cy + r * Math.sin(a)).toFixed(2)];
+};
+const ticks = Array.from({ length: 33 }, (_, i) => {
+  const a = 135 + (i * 270) / 32;
+  const major = i % 4 === 0;
+  const [x1, y1] = polar(a, R);
+  const [x2, y2] = polar(a, R - (major ? 18 : 8));
+  return { x1, y1, x2, y2, major };
+});
+const numbers = Array.from({ length: 9 }, (_, i) => {
+  const [x, y] = polar(135 + i * 33.75, R - 38);
+  return { x, y, v: i };
+});
+const arcPath = (from: number, to: number, r: number) => {
+  const [x1, y1] = polar(from, r);
+  const [x2, y2] = polar(to, r);
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${to - from > 180 ? 1 : 0} 1 ${x2} ${y2}`;
+};
+
+// ── Scene 2: waveform bars
+const bars = Array.from({ length: 29 }, (_, i) => {
+  const x = 100 + i * 10;
+  const env = Math.sin((i / 28) * Math.PI);
+  const h = 8 + env * (40 + 30 * Math.abs(Math.sin(i * 1.7)));
+  return { x, h: +h.toFixed(1), d: +((i * 0.07) % 1.1).toFixed(2) };
+});
+
+// ── Scene 5: gears
+function gear(n: number, ro: number, ri: number) {
+  const step = (Math.PI * 2) / n;
+  const pts: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = i * step;
+    for (const [r, k] of [
+      [ri, -0.27],
+      [ro, -0.13],
+      [ro, 0.13],
+      [ri, 0.27],
+    ]) {
+      pts.push(`${(r * Math.cos(a + k * step)).toFixed(1)} ${(r * Math.sin(a + k * step)).toFixed(1)}`);
+    }
+  }
+  return `M ${pts.join(" L ")} Z`;
+}
+const bigGear = gear(14, 110, 96);
+const smallGear = gear(8, 66, 53);
+const holes = Array.from({ length: 6 }, (_, i) => {
+  const a = (i * Math.PI) / 3;
+  return { x: +(42 * Math.cos(a)).toFixed(1), y: +(42 * Math.sin(a)).toFixed(1) };
+});
+---
+
+<svg
+  class={`scene scene--${n}`}
+  viewBox="0 0 480 400"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  focusable="false"
+  aria-hidden="true"
+>
+  {
+    n === 1 && (
+      <g>
+        <defs>
+          <radialGradient id={`${uid}-glow`}>
+            <stop offset="0" stop-color="var(--copper)" stop-opacity="0.45" />
+            <stop offset="1" stop-color="var(--copper)" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <circle class="s1-glow" cx="240" cy="300" r="64" fill={`url(#${uid}-glow)`} />
+        <path class="ln-dim" d={arcPath(135, 405, R + 14)} />
+        <path class="ln" d={arcPath(135, 405, R)} />
+        <path class="acc thick" d={arcPath(354.4, 405, R - 4)} />
+        {ticks.map((tk) => (
+          <line class={tk.major ? "ln" : "ln-dim"} x1={tk.x1} y1={tk.y1} x2={tk.x2} y2={tk.y2} />
+        ))}
+        {numbers.map((nb) => (
+          <text class="num" x={nb.x} y={nb.y} text-anchor="middle" dominant-baseline="middle">
+            {nb.v}
+          </text>
+        ))}
+        <text class="micro" x="240" y="150" text-anchor="middle">RPM × 1000</text>
+        <g class="s1-needle">
+          <line class="acc thick" x1="240" y1="210" x2="360" y2="210" />
+          <line class="ln" x1="240" y1="210" x2="214" y2="210" />
+        </g>
+        <circle class="hub" cx="240" cy="210" r="7" />
+        <g class="s1-engine" transform="translate(196 278) scale(1.45)">
+          <path d="M10 14H18V8H34V14H42L48 20H52V14H56V32H52V26H48L42 34H18L14 30H10V26H4V18H10Z" />
+          <path d="M22 8V4H30V8" />
+        </g>
+        <text class="micro acc-text" x="240" y="352" text-anchor="middle">{label.toUpperCase()}</text>
+      </g>
+    )
+  }
+
+  {
+    n === 2 && (
+      <g>
+        <circle class="s2-ring" cx="240" cy="200" r="70" />
+        <circle class="s2-ring" cx="240" cy="200" r="70" style="animation-delay:-1.2s" />
+        <circle class="s2-ring" cx="240" cy="200" r="70" style="animation-delay:-2.4s" />
+        <circle class="ln-dim dashed" cx="240" cy="200" r="160" />
+        <line class="ln-dim" x1="70" y1="200" x2="410" y2="200" />
+        {bars.map((b) => (
+          <line
+            class="s2-bar"
+            x1={b.x}
+            y1={200 - b.h}
+            x2={b.x}
+            y2={200 + b.h}
+            style={`animation-delay:-${b.d}s`}
+          />
+        ))}
+        <circle class="s2-rec" cx="86" cy="62" r="5" />
+        <text class="micro" x="100" y="66">REC</text>
+        <text class="micro scene-label" x="394" y="66" text-anchor="end">
+          {label.toUpperCase()}
+        </text>
+      </g>
+    )
+  }
+
+  {
+    n === 3 && (
+      <g>
+        <line class="ln" x1="30" y1="330" x2="450" y2="330" />
+        <path class="ln-dim" d="M60 330V96h14v234M406 330V96h14v234" />
+        <path class="ln-dim" d="M46 330h42M392 330h42" />
+        <g class="s3-lift">
+          <path class="ln-dim" d="M74 304h70M336 304h70" />
+          <rect class="ln-dim" x="132" y="300" width="20" height="6" />
+          <rect class="ln-dim" x="326" y="300" width="20" height="6" />
+          <g transform="translate(80 316)">
+            <path
+              class="ln"
+              d="M8 -14C4 -22 4 -30 8 -36L14 -42C40 -48 80 -52 112 -56C132 -72 150 -86 176 -92C204 -96 232 -94 248 -86C270 -74 296 -64 314 -58L318 -50L316 -30C314 -22 310 -16 302 -14H290A36 36 0 0 0 218 -14H100A36 36 0 0 0 28 -14Z"
+            />
+            <path class="ln-dim" d="M124 -60C140 -76 156 -84 176 -86L236 -84C246 -80 256 -74 262 -66L250 -60Z" />
+            <path class="ln-dim" d="M206 -86L202 -60M120 -56L124 -18M30 -36C110 -40 210 -44 312 -50" />
+            <path class="ln" d="M12 -38L34 -42" />
+            <path class="acc" d="M314 -56L318 -48" />
+            <circle class="ln" cx="64" cy="-14" r="28" />
+            <circle class="ln-dim" cx="64" cy="-14" r="17" />
+            <circle class="ln" cx="254" cy="-14" r="28" />
+            <circle class="ln-dim" cx="254" cy="-14" r="17" />
+            <circle class="s3-ping" cx="64" cy="-14" r="34" />
+            <circle class="acc" cx="64" cy="-14" r="22" stroke-dasharray="4 6" />
+            <g class="s3-callout">
+              <path class="acc" d="M44 -38L10 -110H-40" />
+              <text class="micro acc-text" x="-40" y="-118">
+                {label.toUpperCase()}
+              </text>
+            </g>
+          </g>
+        </g>
+        <g class="s3-scan">
+          <line class="acc" x1="0" y1="150" x2="0" y2="326" />
+          <rect class="s3-beam" x="-30" y="150" width="30" height="176" />
+        </g>
+      </g>
+    )
+  }
+
+  {
+    n === 4 && (
+      <g>
+        <rect class="ln-dim card-back" x="122" y="62" width="190" height="284" rx="6" transform="rotate(-7 217 204)" />
+        <g class="s4-card">
+          <rect class="ln card" x="150" y="48" width="190" height="292" rx="6" />
+          <text class="micro" x="172" y="82">{label.toUpperCase()}</text>
+          <line class="ln-dim" x1="172" y1="96" x2="318" y2="96" />
+          {[0, 1, 2].map((r) => (
+            <g transform={`translate(0 ${r * 46})`}>
+              {r === 1 && <rect class="s4-hl" x="160" y="114" width="170" height="36" rx="3" />}
+              <rect class={r === 1 ? "acc" : "ln-dim"} x="172" y="124" width="16" height="16" rx="2" />
+              <rect class="bar" x="200" y="126" width={[78, 92, 64][r]} height="4" rx="2" />
+              <rect class="bar dim" x="200" y="135" width={[48, 60, 40][r]} height="3" rx="1.5" />
+              <rect class="bar" x="296" y="128" width="22" height="4" rx="2" />
+            </g>
+          ))}
+          <path class="acc thick s4-check" d="M175 179l5 6 9-11" pathLength="1" />
+          <line class="ln-dim" x1="172" y1="262" x2="318" y2="262" />
+          <rect class="bar" x="172" y="276" width="44" height="5" rx="2.5" />
+          <rect class="bar-acc" x="270" y="273" width="48" height="10" rx="2" />
+          <path class="ln s4-sign" d="M176 318c8-14 14-14 16-4s6 10 12-2 10-10 12 0 8 6 16-4" pathLength="1" />
+        </g>
+      </g>
+    )
+  }
+
+  {
+    n === 5 && (
+      <g>
+        <g transform="translate(200 230)">
+          <g class="s5-big">
+            <path class="ln" d={bigGear} />
+            <circle class="ln-dim" r="70" />
+            <circle class="ln" r="20" />
+            {holes.map((h) => (
+              <circle class="ln-dim" cx={h.x} cy={h.y} r="10" />
+            ))}
+          </g>
+        </g>
+        <g transform="translate(324 116)">
+          <g class="s5-small">
+            <path class="acc" d={smallGear} />
+            <circle class="acc" r="14" />
+            <circle class="ln-dim" r="36" />
+          </g>
+        </g>
+        <path class="ln-dim" d="M60 360H420" />
+        <text class="micro" x="60" y="380">TORQUE</text>
+        <text class="micro acc-text scene-label" x="420" y="380" text-anchor="end">
+          {label.toUpperCase()}
+        </text>
+      </g>
+    )
+  }
+
+  {
+    n === 6 && (
+      <g>
+        <circle class="ln-dim dashed" cx="240" cy="196" r="150" />
+        <circle class="ln" cx="240" cy="82" r="18" />
+        <rect class="ln" x="192" y="104" width="96" height="172" rx="46" />
+        <circle class="ln" cx="240" cy="158" r="17" />
+        <path class="ln" d="M233 160v-5a7 7 0 0 1 14 0v5M231 160h18v10h-18z" />
+        <circle class="ln" cx="240" cy="206" r="17" />
+        <path class="ln-dim" d="M233 208v-5a7 7 0 0 1 14 0M231 208h18v10h-18z" />
+        <circle class="ln-dim" cx="240" cy="248" r="9" />
+        <path class="s6-wave" d="M302 118a22 22 0 0 1 0 30" />
+        <path class="s6-wave" d="M314 106a40 40 0 0 1 0 54" style="animation-delay:.25s" />
+        <path class="s6-wave" d="M326 94a58 58 0 0 1 0 78" style="animation-delay:.5s" />
+        <g class="s6-badge">
+          <circle class="badge" cx="318" cy="292" r="30" />
+          <path class="s6-check" d="M305 292l9 9 17-19" pathLength="1" />
+        </g>
+        <text class="micro acc-text scene-label" x="240" y="366" text-anchor="middle">
+          {label.toUpperCase()}
+        </text>
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .scene {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .ln,
+  .ln-dim,
+  .acc {
+    vector-effect: non-scaling-stroke;
+    stroke-width: 1.25;
+  }
+
+  .ln {
+    stroke: var(--bone);
+    stroke-opacity: 0.85;
+  }
+
+  .ln-dim {
+    stroke: var(--bone);
+    stroke-opacity: 0.22;
+  }
+
+  .acc {
+    stroke: var(--copper);
+  }
+
+  .thick {
+    stroke-width: 2.5;
+  }
+
+  .dashed {
+    stroke-dasharray: 2 6;
+  }
+
+  .card {
+    fill: var(--ink-3);
+  }
+
+  .card-back {
+    fill: var(--ink-2);
+  }
+
+  .bar {
+    fill: var(--bone);
+    fill-opacity: 0.55;
+  }
+
+  .bar.dim {
+    fill-opacity: 0.2;
+  }
+
+  .bar-acc {
+    fill: var(--copper);
+  }
+
+  .num,
+  .micro {
+    fill: var(--muted);
+    stroke: none;
+    font-family: var(--font-sans);
+  }
+
+  .num {
+    font-size: 13px;
+  }
+
+  .micro {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  .acc-text {
+    fill: var(--copper);
+  }
+
+  :global(.stage) .scene-label {
+    display: none;
+  }
+
+  .hub {
+    fill: var(--ink);
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+
+  /* Scene 1 */
+  .s1-needle {
+    transform-box: view-box;
+    transform-origin: 240px 210px;
+    transform: rotate(168deg);
+  }
+
+  .s1-engine path {
+    stroke: var(--copper);
+    stroke-width: 1.6;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .s1-glow {
+    opacity: 0.6;
+  }
+
+  :global(.is-active) .scene .s1-needle {
+    animation: s1-needle 3.2s var(--ease-in-out) infinite;
+  }
+
+  :global(.is-active) .scene .s1-glow,
+  :global(.is-active) .scene .s1-engine {
+    animation: s1-blink 1.6s steps(1, end) infinite;
+  }
+
+  @keyframes s1-needle {
+    0%, 100% { transform: rotate(168deg); }
+    20% { transform: rotate(182deg); }
+    28% { transform: rotate(160deg); }
+    45% { transform: rotate(206deg); }
+    55% { transform: rotate(172deg); }
+    75% { transform: rotate(190deg); }
+  }
+
+  @keyframes s1-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  /* Scene 2 */
+  .s2-bar {
+    stroke: var(--bone);
+    stroke-width: 2.5;
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scaleY(0.35);
+  }
+
+  .s2-ring {
+    stroke: var(--copper);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+  }
+
+  .s2-rec {
+    fill: var(--copper);
+  }
+
+  :global(.is-active) .scene .s2-bar {
+    animation: s2-bar 1.1s var(--ease-in-out) infinite alternate;
+  }
+
+  :global(.is-active) .scene .s2-ring {
+    animation: s2-ring 3.6s var(--ease-out) infinite;
+  }
+
+  :global(.is-active) .scene .s2-rec {
+    animation: s1-blink 1.4s steps(1, end) infinite;
+  }
+
+  @keyframes s2-bar {
+    from { transform: scaleY(0.2); }
+    to { transform: scaleY(1); }
+  }
+
+  @keyframes s2-ring {
+    0% { transform: scale(0.6); opacity: 0.7; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+
+  /* Scene 3 */
+  .s3-ping {
+    stroke: var(--copper);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+  }
+
+  .s3-beam {
+    fill: var(--copper);
+    opacity: 0.08;
+  }
+
+  .s3-scan {
+    opacity: 0;
+  }
+
+  .s3-callout {
+    opacity: 0;
+  }
+
+  :global(.is-active) .scene .s3-lift {
+    animation: s3-lift 1.6s var(--ease-in-out) 0.2s both;
+  }
+
+  :global(.is-active) .scene .s3-scan {
+    animation: s3-scan 3s var(--ease-in-out) 1.4s infinite;
+  }
+
+  :global(.is-active) .scene .s3-ping {
+    animation: s2-ring 2s var(--ease-out) 2s infinite;
+  }
+
+  :global(.is-active) .scene .s3-callout {
+    animation: fade-in 0.8s var(--ease-out) 2.2s both;
+  }
+
+  @keyframes s3-lift {
+    from { transform: translateY(0); }
+    to { transform: translateY(-46px); }
+  }
+
+  @keyframes s3-scan {
+    0% { transform: translateX(110px); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateX(400px); opacity: 0; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Scene 4 */
+  .s4-hl {
+    fill: var(--copper);
+    opacity: 0.1;
+  }
+
+  .s4-check,
+  .s4-sign {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .s4-sign {
+    stroke-width: 1.5;
+  }
+
+  :global(.is-active) .scene .s4-card {
+    animation: s4-float 6s var(--ease-in-out) infinite;
+  }
+
+  :global(.is-active) .scene .s4-check {
+    animation: draw 0.7s var(--ease-out) 0.6s both;
+  }
+
+  :global(.is-active) .scene .s4-sign {
+    animation: draw 1.4s var(--ease-in-out) 1.2s both;
+  }
+
+  @keyframes s4-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Scene 5 */
+  .s5-small {
+    transform: rotate(22.5deg);
+  }
+
+  :global(.is-active) .scene .s5-big {
+    animation: spin 22s linear infinite;
+  }
+
+  :global(.is-active) .scene .s5-small {
+    animation: spin-rev 12.57s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes spin-rev {
+    from { transform: rotate(22.5deg); }
+    to { transform: rotate(-337.5deg); }
+  }
+
+  /* Scene 6 */
+  .s6-wave {
+    stroke: var(--copper);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.25;
+  }
+
+  .badge {
+    fill: var(--copper);
+  }
+
+  .s6-check {
+    stroke: var(--ink);
+    stroke-width: 3;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .s6-badge {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  :global(.is-active) .scene .s6-wave {
+    animation: s6-wave 1.8s var(--ease-out) infinite;
+  }
+
+  :global(.is-active) .scene .s6-badge {
+    animation: pop 0.9s var(--ease-out) 0.4s both;
+  }
+
+  :global(.is-active) .scene .s6-check {
+    animation: draw 0.6s var(--ease-out) 0.9s both;
+  }
+
+  @keyframes s6-wave {
+    0% { opacity: 0.15; }
+    30% { opacity: 1; }
+    100% { opacity: 0.15; }
+  }
+
+  @keyframes pop {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+</style>

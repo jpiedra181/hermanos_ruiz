@@ -1,0 +1,392 @@
+---
+import JourneyScene from "./JourneyScene.astro";
+import { useTranslations, type Lang } from "../i18n/utils";
+
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+const steps = [1, 2, 3, 4, 5, 6].map((n) => {
+  const k = `narrative.0${n}` as "narrative.01";
+  return {
+    title: t(`${k}.title` as "narrative.01.title"),
+    text: t(`${k}.text` as "narrative.01.text"),
+    visual: t(`${k}.visual` as "narrative.01.visual"),
+  };
+});
+const pad = (n: number) => String(n).padStart(2, "0");
+---
+
+<section id="process" class="journey" aria-labelledby="journey-title" data-journey>
+  <div class="container">
+    <header class="journey__head">
+      <p class="eyebrow" data-reveal="fade">{t("journey.eyebrow")}</p>
+      <h2 class="section-title" id="journey-title" data-reveal="lines">
+        {t("journey.title.1")} <em>{t("journey.title.2")}</em>
+      </h2>
+      <p class="journey__intro" data-reveal="fade" data-delay="0.15">{t("journey.intro")}</p>
+    </header>
+
+    <div class="journey__body">
+      <div class="journey__stage-wrap" aria-hidden="true">
+        <div class="stage" data-stage>
+          <div class="stage__grid"></div>
+          {
+            steps.map((s, i) => (
+              <div class:list={["stage__scene", { "is-active": i === 0 }]} data-scene={i}>
+                <JourneyScene n={i + 1} label={s.visual} />
+              </div>
+            ))
+          }
+          <div class="stage__top">
+            <span>{t("journey.step")} <span data-stage-num>01</span> / {pad(steps.length)}</span>
+            <span class="stage__label" data-stage-label>{steps[0].visual}</span>
+          </div>
+          <div class="stage__bottom">
+            {steps.map((_, i) => <span class:list={["stage__tick", { "is-on": i === 0 }]} data-tick={i} />)}
+          </div>
+          <span class="stage__corner stage__corner--tl"></span>
+          <span class="stage__corner stage__corner--tr"></span>
+          <span class="stage__corner stage__corner--bl"></span>
+          <span class="stage__corner stage__corner--br"></span>
+        </div>
+      </div>
+
+      <div class="journey__list">
+      <span class="journey__rail" aria-hidden="true"><span data-rail></span></span>
+      <ol class="journey__steps">
+        {
+          steps.map((s, i) => (
+            <li class="step" data-step={i} data-label={s.visual}>
+              <div class="step__visual" aria-hidden="true">
+                <JourneyScene n={i + 1} label={s.visual} />
+              </div>
+              <span class="step__num" aria-hidden="true">
+                {pad(i + 1)}
+              </span>
+              <h3 class="step__title">{s.title}</h3>
+              <p class="step__text">{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .journey {
+    position: relative;
+    padding-block: var(--section);
+    background:
+      radial-gradient(60% 40% at 15% 30%, rgba(207, 127, 69, 0.06), transparent 70%),
+      var(--ink-2);
+    border-top: 1px solid var(--line);
+  }
+
+  .journey__head {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: clamp(3rem, 8vw, 6rem);
+  }
+
+  .journey__intro {
+    max-width: 40ch;
+    font-size: var(--fs-lead);
+    color: var(--bone-2);
+  }
+
+  @media (min-width: 1024px) {
+    .journey__head {
+      grid-template-columns: 1.4fr 1fr;
+      align-items: end;
+      column-gap: 4rem;
+    }
+
+    .journey__head .eyebrow {
+      grid-column: 1 / -1;
+    }
+
+    .journey__intro {
+      justify-self: end;
+      padding-bottom: 0.75rem;
+    }
+  }
+
+  /* ── Steps (mobile first: stacked cards) ───────────── */
+  .journey__list {
+    position: relative;
+  }
+
+  .journey__steps {
+    display: grid;
+    gap: clamp(3.5rem, 10vw, 5rem);
+    counter-reset: step;
+  }
+
+  .journey__rail {
+    display: none;
+  }
+
+  .step__visual {
+    position: relative;
+    aspect-ratio: 6 / 5;
+    margin-bottom: 1.75rem;
+    padding: 6%;
+    border: 1px solid var(--line);
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 2rem 2rem,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 2rem 2rem,
+      var(--ink);
+    background-blend-mode: normal;
+  }
+
+  .step__visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(closest-side, transparent 40%, var(--ink) 120%);
+    pointer-events: none;
+  }
+
+  .step__num {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: var(--copper);
+  }
+
+  .step__title {
+    margin-bottom: 1.25rem;
+    font-size: var(--fs-h3);
+    line-height: 1;
+  }
+
+  .step__text {
+    max-width: 44ch;
+    color: var(--bone-2);
+  }
+
+  .journey__stage-wrap {
+    display: none;
+  }
+
+  /* ── Desktop: sticky stage + scrolling steps ───────── */
+  @media (min-width: 1024px) {
+    .journey__body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: clamp(4rem, 7vw, 8rem);
+    }
+
+    .journey__stage-wrap {
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      height: 100svh;
+    }
+
+    .journey__list {
+      padding-left: 3rem;
+    }
+
+    .journey__steps {
+      gap: 0;
+    }
+
+    .journey__rail {
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .journey__rail span {
+      position: absolute;
+      inset: 0;
+      background: var(--copper);
+      transform-origin: top;
+      transform: scaleY(0);
+    }
+
+    .step {
+      min-height: 78svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: opacity 0.7s var(--ease-out);
+    }
+
+    :global(html.js) .step:not(.is-active) {
+      opacity: 0.22;
+    }
+
+    .step__visual {
+      display: none;
+    }
+
+    .step__title {
+      font-size: clamp(2.25rem, 3.4vw, 3.5rem);
+    }
+  }
+
+  /* ── Stage ─────────────────────────────────────────── */
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 6 / 5;
+    max-height: 76svh;
+    border: 1px solid var(--line);
+    background: var(--ink);
+    overflow: hidden;
+  }
+
+  .stage__grid {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 3rem 3rem;
+    opacity: 0.5;
+    -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+    mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  }
+
+  .stage__scene {
+    position: absolute;
+    inset: 9% 8%;
+    opacity: 0;
+    transform: translateY(2rem) scale(0.97);
+    transition:
+      opacity 0.8s var(--ease-out),
+      transform 1.2s var(--ease-out);
+  }
+
+  .stage__scene.is-active {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.15s;
+  }
+
+  .stage__top,
+  .stage__bottom {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.6875rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stage__top {
+    top: 1.25rem;
+  }
+
+  .stage__label {
+    color: var(--copper);
+  }
+
+  .stage__bottom {
+    bottom: 1.5rem;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .stage__tick {
+    flex: 1;
+    height: 2px;
+    background: var(--line);
+    transition: background-color 0.6s var(--ease-out);
+  }
+
+  .stage__tick.is-on {
+    background: var(--copper);
+  }
+
+  .stage__corner {
+    position: absolute;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-color: var(--bone-2);
+    border-style: solid;
+    border-width: 0;
+  }
+
+  .stage__corner--tl { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
+  .stage__corner--tr { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; }
+  .stage__corner--bl { bottom: -1px; left: -1px; border-bottom-width: 1px; border-left-width: 1px; }
+  .stage__corner--br { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, reducedMotion } from "../scripts/motion";
+
+  const root = document.querySelector<HTMLElement>("[data-journey]");
+  if (root) {
+    const steps = gsap.utils.toArray<HTMLElement>("[data-step]", root);
+    const scenes = gsap.utils.toArray<HTMLElement>("[data-scene]", root);
+    const ticks = gsap.utils.toArray<HTMLElement>("[data-tick]", root);
+    const num = root.querySelector<HTMLElement>("[data-stage-num]");
+    const label = root.querySelector<HTMLElement>("[data-stage-label]");
+    const rail = root.querySelector<HTMLElement>("[data-rail]");
+    let active = -1;
+
+    const setActive = (i: number) => {
+      if (i === active) return;
+      active = i;
+      steps.forEach((s, k) => s.classList.toggle("is-active", k === i));
+      scenes.forEach((s, k) => s.classList.toggle("is-active", k === i));
+      ticks.forEach((s, k) => s.classList.toggle("is-on", k <= i));
+      if (num) num.textContent = String(i + 1).padStart(2, "0");
+      if (label) label.textContent = steps[i].dataset.label ?? "";
+    };
+
+    setActive(0);
+
+    steps.forEach((step, i) => {
+      ScrollTrigger.create({
+        trigger: step,
+        start: "top 62%",
+        end: "bottom 62%",
+        onToggle: (self) => self.isActive && setActive(i),
+      });
+    });
+
+    if (rail && !reducedMotion()) {
+      gsap.to(rail, {
+        scaleY: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: root.querySelector(".journey__list"),
+          start: "top 62%",
+          end: "bottom 62%",
+          scrub: true,
+        },
+      });
+    }
+
+    // Step copy rises in on every viewport size.
+    if (!reducedMotion()) {
+      steps.forEach((step) => {
+        gsap.from(step.querySelectorAll(".step__num, .step__title, .step__text"), {
+          y: 36,
+          autoAlpha: 0,
+          duration: 1.1,
+          ease: "expo.out",
+          stagger: 0.08,
+          scrollTrigger: { trigger: step, start: "top 80%", once: true },
+        });
+      });
+    }
+  }
+</script>

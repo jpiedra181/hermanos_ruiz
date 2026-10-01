@@ -1,348 +1,758 @@
 ---
-import { useTranslations } from "../i18n/utils";
+import { useTranslations, type Lang } from "../i18n/utils"
+import { SERVICE_KEYS } from "../data/services"
 
-const { lang = "es" } = Astro.props;
-const t = useTranslations(lang);
+const { lang } = Astro.props as { lang: Lang }
+const t = useTranslations(lang)
+
+const LAT = 40.3052
+const LNG = -3.7233
+const directions = `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}`
+const services = SERVICE_KEYS.map((key) => ({
+    key,
+    name: t(`services.${key}` as "services.mechanic"),
+}))
+const statusText = {
+    open: t("contact.open"),
+    closed: t("contact.closed"),
+    closes: t("contact.closes"),
+    opens: t("contact.opens"),
+    today: t("contact.today"),
+    tomorrow: t("contact.tomorrow"),
+    monday: t("contact.monday"),
+}
+const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`
 ---
 
-<section id="contact" class="contact-section">
-  <div class="container">
-    <div class="contact-grid">
-      <div class="contact-info">
-        <h2>{t("contact.title")}</h2>
-        <p class="intro">{t("contact.intro")}</p>
+<section id="contact" class="contact" aria-labelledby="contact-title">
+    <div class="container contact__grid">
+        <div class="contact__info">
+            <p class="eyebrow" data-reveal="fade">{t("contact.eyebrow")}</p>
+            <h2
+                class="section-title contact__title"
+                id="contact-title"
+                data-reveal="lines"
+            >
+                {t("contact.title")}
+            </h2>
+            <p class="contact__intro" data-reveal="fade">
+                {t("contact.intro")}
+            </p>
 
-        <div class="info-item">
-          <strong>{t("contact.address.label")}</strong>
-          <p>{t("contact.address.value")}</p>
+            <p
+                class="status"
+                data-status
+                data-text={JSON.stringify(statusText)}
+                hidden
+            >
+                <span class="status__dot" aria-hidden="true"></span>
+                <span data-status-text></span>
+            </p>
+
+            <dl class="contact__list" data-reveal="stagger">
+                <div>
+                    <dt>{t("contact.address.label")}</dt>
+                    <dd>{t("contact.address.value")}</dd>
+                </div>
+                <div>
+                    <dt>{t("contact.phone.label")}</dt>
+                    <dd>
+                        <a
+                            class="link-underline contact__phone"
+                            href="tel:+34916820000">91 682 00 00</a>
+                    </dd>
+                </div>
+                <div>
+                    <dt>{t("contact.schedule.label")}</dt>
+                    <dd>
+                        {t("contact.schedule.week")}<br />
+                        {t("contact.schedule.saturday")}
+                    </dd>
+                </div>
+            </dl>
+
+            <div class="contact__actions" data-reveal="fade">
+                <a
+                    class="btn btn--whatsapp"
+                    href=""
+                    target="_blank"
+                    rel="noopener"
+                >
+                    {t("contact.whatsapp")}
+                    <span class="visually-hidden">{t("a11y.newtab")}</span>
+                    <span
+                        class="btn__icon"
+                        aria-hidden="true"
+                        set:html={arrow + arrow}
+                    />
+                </a>
+                <a
+                    class="contact__directions link-underline"
+                    href={directions}
+                    target="_blank"
+                    rel="noopener"
+                >
+                    {t("contact.directions")}
+                    <span class="visually-hidden">{t("a11y.newtab")}</span>
+                </a>
+            </div>
         </div>
 
-        <div class="info-item">
-          <strong>{t("contact.phone.label")}</strong>
-          <p><a href="tel:916820000">91 682 00 00</a></p>
+        <div class="contact__form-wrap" data-reveal="fade" data-delay="0.1">
+            <form
+                class="form"
+                novalidate
+                data-form
+                data-error-summary={t("form.errors")}
+            >
+                <h3 class="form__title">{t("form.title")}</h3>
+                <p class="form__note">{t("form.note")}</p>
+
+                <div class="field">
+                    <input
+                        class="field__input"
+                        id="f-name"
+                        name="name"
+                        type="text"
+                        autocomplete="name"
+                        required
+                        placeholder=" "
+                        aria-describedby="f-name-error"
+                        data-error={t("form.error.name")}
+                    />
+                    <label class="field__label" for="f-name"
+                        >{t("form.name")}</label
+                    >
+                    <p class="field__error" id="f-name-error"></p>
+                </div>
+
+                <div class="field">
+                    <input
+                        class="field__input"
+                        id="f-phone"
+                        name="phone"
+                        type="tel"
+                        inputmode="tel"
+                        autocomplete="tel"
+                        required
+                        placeholder=" "
+                        pattern="^(\+34)?[6789]\d{8}$"
+                        aria-describedby="f-phone-error"
+                        data-error={t("form.error.phone")}
+                    />
+                    <label class="field__label" for="f-phone"
+                        >{t("form.phone")}</label
+                    >
+                    <p class="field__error" id="f-phone-error"></p>
+                </div>
+
+                <div class="form__row">
+                    <div class="field field--static">
+                        <select
+                            class="field__input"
+                            id="f-service"
+                            name="service"
+                        >
+                            <option value="">—</option>
+                            {
+                                services.map((s) => (
+                                    <option value={s.key}>{s.name}</option>
+                                ))
+                            }
+                        </select>
+                        <label class="field__label" for="f-service">
+                            {t("nav.services")}
+                            <span class="field__optional"
+                                >({t("form.optional")})</span
+                            >
+                        </label>
+                    </div>
+
+                    <div class="field field--static">
+                        <input
+                            class="field__input"
+                            id="f-date"
+                            name="date"
+                            type="date"
+                            aria-describedby="f-date-error"
+                            data-error={t("form.error.date")}
+                        />
+                        <label class="field__label" for="f-date">
+                            {t("form.date")}
+                            <span class="field__optional"
+                                >({t("form.optional")})</span
+                            >
+                        </label>
+                        <p class="field__error" id="f-date-error"></p>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <textarea
+                        class="field__input"
+                        id="f-problem"
+                        name="problem"
+                        rows="3"
+                        placeholder=" "></textarea>
+                    <label class="field__label" for="f-problem">
+                        {t("form.problem")}
+                        <span class="field__optional"
+                            >({t("form.optional")})</span
+                        >
+                    </label>
+                </div>
+
+                <button
+                    class="btn btn--primary form__submit"
+                    type="submit"
+                    data-magnetic="0.15"
+                >
+                    {t("form.submit")}
+                    <span
+                        class="btn__icon"
+                        aria-hidden="true"
+                        set:html={arrow + arrow}
+                    />
+                </button>
+
+                <p
+                    class="form__status"
+                    role="status"
+                    aria-live="polite"
+                    data-form-status
+                    data-success={t("form.success")}
+                >
+                </p>
+            </form>
         </div>
-
-        <div class="info-item">
-          <strong>{t("contact.schedule.label")}</strong>
-          <p>{t("contact.schedule.week")}</p>
-          <p>{t("contact.schedule.saturday")}</p>
-        </div>
-
-        <a
-          href="https://zerosugar.studio/"
-          class="whatsapp-btn"
-          target="_blank"
-        >
-          {t("contact.whatsapp")}
-        </a>
-      </div>
-
-      <div class="contact-form-wrapper">
-        <form class="contact-form">
-          <div class="form-group">
-            <label for="name">{t("form.name")}</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              placeholder={t("form.name.placeholder")}
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="phone">{t("form.phone")}</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              required
-              placeholder={t("form.phone.placeholder")}
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="date">{t("form.date")}</label>
-            <input type="date" id="date" name="date" />
-          </div>
-
-          <div class="form-group">
-            <label for="problem">{t("form.problem")}</label>
-            <textarea
-              id="problem"
-              name="problem"
-              rows="4"
-              placeholder={t("form.problem.placeholder")}></textarea>
-          </div>
-
-          <button type="submit" class="submit-btn">{t("form.submit")}</button>
-        </form>
-      </div>
     </div>
 
-    <!-- Map -->
-    <div id="map"></div>
-  </div>
+    <div class="container">
+        <div class="map-wrap" data-reveal="clip">
+            <div
+                class="map"
+                id="map"
+                role="region"
+                aria-label={t("contact.map.label")}
+                data-map
+                data-lat={LAT}
+                data-lng={LNG}
+                data-label={t("contact.address.value")}
+            >
+                <p class="map__loading">{t("contact.map.loading")}</p>
+            </div>
+            <p class="map__coords" aria-hidden="true">
+                40.3052° N — 3.7233° W · Getafe
+            </p>
+        </div>
+    </div>
 </section>
 
-<!-- Leaflet styles injected globally (not scoped) so they apply to Leaflet's own DOM -->
 <style is:global>
-  #map {
-    width: 100%;
-    height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    border: 4px solid #333;
-    background: #1a1a1a;
-  }
-
-  /* Dark tile filter */
-  #map .leaflet-layer,
-  #map .leaflet-tile-pane,
-  #map .leaflet-tile {
-    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-  }
-
-  /* Zoom controls */
-  #map .leaflet-control-zoom {
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 6px !important;
-    overflow: hidden;
-  }
-
-  #map .leaflet-control-zoom a {
-    background: #2a2a2a !important;
-    color: #f5f5f5 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
-
-  #map .leaflet-control-zoom a:hover {
-    background: #d35400 !important;
-    color: #fff !important;
-  }
-
-  /* Popup */
-  #map .leaflet-popup-content-wrapper {
-    background: #2a2a2a;
-    color: #f5f5f5;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  }
-
-  #map .leaflet-popup-tip {
-    background: #2a2a2a;
-  }
-
-  #map .leaflet-popup-content {
-    margin: 14px 18px;
-  }
-
-  /* Attribution */
-  #map .leaflet-control-attribution {
-    background: rgba(26, 26, 26, 0.8) !important;
-    color: #7f8c8d !important;
-    font-size: 10px;
-  }
-
-  #map .leaflet-control-attribution a {
-    color: #d35400 !important;
-  }
-
-  @media (max-width: 768px) {
-    #map {
-      height: 300px;
+    .map .leaflet-tile-pane {
+        filter: grayscale(1) invert(1) contrast(0.88) brightness(0.92);
     }
-  }
+
+    .map .leaflet-container,
+    .map.leaflet-container {
+        background: var(--ink-3);
+        font-family: var(--font-sans);
+    }
+
+    .map .leaflet-control-zoom {
+        border: 1px solid var(--line-strong) !important;
+        border-radius: 999px !important;
+        overflow: hidden;
+        margin: 0 1rem 1rem 0 !important;
+    }
+
+    .map .leaflet-control-zoom a {
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+        line-height: 2.75rem !important;
+        background: var(--ink-2) !important;
+        color: var(--bone) !important;
+        border: 0 !important;
+    }
+
+    .map .leaflet-control-zoom a:hover {
+        background: var(--copper) !important;
+        color: var(--ink) !important;
+    }
+
+    .map .leaflet-control-attribution {
+        background: rgba(11, 11, 12, 0.8) !important;
+        color: var(--muted) !important;
+    }
+
+    .map .leaflet-control-attribution a {
+        color: var(--bone-2) !important;
+    }
+
+    .map-pin {
+        position: relative;
+    }
+
+    .map-pin__dot,
+    .map-pin__pulse {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+    }
+
+    .map-pin__dot {
+        inset: 4px;
+        background: var(--copper);
+        border: 2px solid var(--bone);
+        box-shadow: 0 0 0 6px rgba(207, 127, 69, 0.25);
+    }
+
+    .map-pin__pulse {
+        background: var(--copper);
+        animation: pin-pulse 2.4s var(--ease-out) infinite;
+    }
+
+    @keyframes pin-pulse {
+        from {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
 </style>
 
 <style>
-  .contact-section {
-    padding: 6rem 0;
-    background-color: var(--color-primary);
-  }
-
-  .contact-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 4rem;
-    margin-bottom: 4rem;
-  }
-
-  @media (min-width: 768px) {
-    .contact-grid {
-      grid-template-columns: 1fr 1fr;
+    .contact {
+        padding-block: var(--section) clamp(3rem, 6vw, 5rem);
+        background: var(--ink-2);
+        border-top: 1px solid var(--line);
     }
-  }
 
-  h2 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: white;
-  }
+    .contact__grid {
+        display: grid;
+        gap: clamp(3rem, 7vw, 6rem);
+        margin-bottom: clamp(3rem, 7vw, 6rem);
+    }
 
-  .intro {
-    font-size: 1.2rem;
-    color: #ccc;
-    margin-bottom: 3rem;
-  }
+    @media (min-width: 1024px) {
+        .contact__grid {
+            grid-template-columns: 1fr 1fr;
+            align-items: start;
+        }
+    }
 
-  .info-item {
-    margin-bottom: 2rem;
-  }
+    .contact__title {
+        margin-top: 1.5rem;
+    }
 
-  .info-item strong {
-    display: block;
-    font-family: var(--font-heading);
-    color: var(--color-accent);
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-  }
+    .contact__intro {
+        margin-top: 1.5rem;
+        max-width: 34ch;
+        font-size: var(--fs-lead);
+        color: var(--bone-2);
+    }
 
-  .info-item p {
-    margin: 0;
-    color: #eee;
-  }
+    /* Open / closed */
+    .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        padding: 0.625rem 1.125rem;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        font-size: var(--fs-small);
+        color: var(--bone-2);
+    }
 
-  .whatsapp-btn {
-    display: inline-block;
-    background-color: #25d366;
-    color: white;
-    padding: 1rem 2rem;
-    border-radius: 4px;
-    font-weight: 600;
-    margin-top: 1rem;
-    transition: transform 0.2s;
-  }
+    .status__dot {
+        position: relative;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: var(--muted);
+    }
 
-  .whatsapp-btn:hover {
-    transform: scale(1.05);
-  }
+    .status.is-open .status__dot {
+        background: var(--ok);
+    }
 
-  .contact-form {
-    background: var(--color-secondary);
-    padding: 2.5rem;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  }
+    .status.is-open .status__dot::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: var(--ok);
+        animation: pin-pulse 2s var(--ease-out) infinite;
+    }
 
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
+    .contact__list {
+        display: grid;
+        gap: 1.75rem;
+        margin: 2.75rem 0;
+    }
 
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: #aaa;
-  }
+    .contact__list dt {
+        margin-bottom: 0.375rem;
+        font-size: var(--fs-label);
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
 
-  input,
-  textarea {
-    width: 100%;
-    padding: 1rem;
-    background: #333;
-    border: 1px solid #444;
-    color: white;
-    border-radius: 4px;
-    font-family: inherit;
-  }
+    .contact__list dd {
+        margin: 0;
+        font-size: 1.125rem;
+    }
 
-  input:focus,
-  textarea:focus {
-    outline: none;
-    border-color: var(--color-accent);
-  }
+    .contact__phone {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 3.4vw, 2.75rem);
+        line-height: 1.1;
+    }
 
-  .submit-btn {
-    width: 100%;
-    padding: 1rem;
-    background: var(--color-accent);
-    color: white;
-    border: none;
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
+    .contact__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1.25rem 2rem;
+    }
 
-  .submit-btn:hover {
-    background: #e67e22;
-  }
+    .btn--whatsapp {
+        --btn-fill: #25d366;
+    }
+
+    .contact__directions {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding-block: 0.75rem;
+    }
+
+    /* ── Form ──────────────────────────────────────────── */
+    .form {
+        position: relative;
+        padding: clamp(1.75rem, 4vw, 3.5rem);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--ink);
+    }
+
+    .form__title {
+        font-size: clamp(2rem, 3vw, 2.75rem);
+    }
+
+    .form__note {
+        margin: 0.75rem 0 2.25rem;
+        font-size: var(--fs-small);
+        color: var(--muted);
+    }
+
+    .form__row {
+        display: grid;
+        gap: 0 1.5rem;
+    }
+
+    @media (min-width: 560px) {
+        .form__row {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .field {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.75rem;
+    }
+
+    .field__input {
+        order: 2;
+        width: 100%;
+        min-height: 3.25rem;
+        padding: 1.375rem 0 0.5rem;
+        border: 0;
+        border-bottom: 1px solid var(--line-strong);
+        border-radius: 0;
+        background: transparent;
+        font-size: 1.0625rem;
+        color: var(--bone);
+        transition: border-color 0.4s;
+        appearance: none;
+    }
+
+    textarea.field__input {
+        resize: vertical;
+        min-height: 6rem;
+    }
+
+    select.field__input {
+        padding-right: 1.5rem;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23b8b2a7' stroke-width='1.5'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E")
+            right 0.25rem bottom 1.1rem no-repeat;
+    }
+
+    select.field__input option {
+        background: var(--ink-2);
+        color: var(--bone);
+    }
+
+    .field__input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.8);
+        cursor: pointer;
+    }
+
+    .field__input:focus {
+        outline: none;
+        border-bottom-color: var(--copper);
+    }
+
+    .field__label {
+        position: absolute;
+        left: 0;
+        top: 1.375rem;
+        font-size: 1.0625rem;
+        color: var(--muted);
+        transform-origin: left top;
+        transition:
+            transform 0.4s var(--ease-out),
+            color 0.3s;
+        pointer-events: none;
+    }
+
+    .field__input:focus ~ .field__label,
+    .field__input:not(:placeholder-shown) ~ .field__label,
+    .field--static .field__label {
+        transform: translateY(-1.25rem) scale(0.78);
+        color: var(--bone-2);
+    }
+
+    .field__input:focus ~ .field__label {
+        color: var(--copper);
+    }
+
+    .field__optional {
+        color: var(--muted);
+        font-size: 0.85em;
+    }
+
+    .field__error {
+        order: 3;
+        min-height: 0;
+        margin-top: 0.5rem;
+        font-size: var(--fs-small);
+        color: #f0a27a;
+    }
+
+    .field__error:empty {
+        display: none;
+    }
+
+    .field__input[aria-invalid="true"] {
+        border-bottom-color: #f0a27a;
+    }
+
+    .form__submit {
+        width: 100%;
+        margin-top: 0.75rem;
+    }
+
+    .form__status {
+        margin-top: 1.25rem;
+        font-size: var(--fs-small);
+        color: var(--bone-2);
+    }
+
+    .form__status.is-success {
+        padding: 1rem 1.25rem;
+        border: 1px solid rgba(123, 194, 154, 0.4);
+        border-radius: var(--radius);
+        color: var(--ok);
+    }
+
+    .form__status:empty {
+        display: none;
+    }
+
+    /* ── Map ───────────────────────────────────────────── */
+    .map-wrap {
+        position: relative;
+    }
+
+    .map {
+        position: relative;
+        height: clamp(20rem, 42vw, 32rem);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--ink-3);
+        z-index: 0;
+    }
+
+    .map__loading {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-size: var(--fs-small);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    .map__coords {
+        margin-top: 1rem;
+        font-size: 0.6875rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
 </style>
 
 <script>
-  //@ts-nocheck
-  import { gsap } from "gsap";
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
-  import L from "leaflet";
-  import "leaflet/dist/leaflet.css";
+    // ── Open / closed, always in Madrid time
+    const status = document.querySelector<HTMLElement>("[data-status]")
+    if (status) {
+        const txt = JSON.parse(status.dataset.text!)
+        const textEl = status.querySelector<HTMLElement>("[data-status-text]")!
+        // [open, close] in minutes, index 0 = Sunday
+        const hours: ([number, number] | null)[] = [
+            null,
+            [510, 1140],
+            [510, 1140],
+            [510, 1140],
+            [510, 1140],
+            [510, 1140],
+            [540, 840],
+        ]
+        const fmt = (m: number) =>
+            `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`
 
-  gsap.registerPlugin(ScrollTrigger);
+        const update = () => {
+            const parts = new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Europe/Madrid",
+                weekday: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23",
+            }).formatToParts(new Date())
+            const get = (type: string) =>
+                parts.find((p) => p.type === type)?.value ?? ""
+            const day = [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+            ].indexOf(get("weekday"))
+            const now = Number(get("hour")) * 60 + Number(get("minute"))
+            const today = hours[day]
 
-  gsap.set(".form-group", { opacity: 0, y: 20 });
-  gsap.to(".form-group", {
-    scrollTrigger: {
-      trigger: ".contact-form",
-      start: "top 80%",
-      once: true,
-    },
-    y: 0,
-    opacity: 1,
-    duration: 0.5,
-    stagger: 0.1,
-    ease: "power2.out",
-  });
+            if (today && now >= today[0] && now < today[1]) {
+                status.classList.add("is-open")
+                textEl.textContent = `${txt.open} · ${txt.closes} ${fmt(today[1])}`
+            } else {
+                status.classList.remove("is-open")
+                let label = ""
+                if (today && now < today[0])
+                    label = `${txt.today} ${fmt(today[0])}`
+                else {
+                    for (let d = 1; d <= 7; d++) {
+                        const next = hours[(day + d) % 7]
+                        if (!next) continue
+                        label =
+                            d === 1
+                                ? `${txt.tomorrow} ${fmt(next[0])}`
+                                : `${txt.monday} ${fmt(next[0])}`
+                        break
+                    }
+                }
+                textEl.textContent = `${txt.closed} · ${txt.opens} ${label}`
+            }
+            status.hidden = false
+        }
+        update()
+        setInterval(update, 60_000)
+    }
 
-  // Init Leaflet
-  const LAT = 40.3052;
-  const LNG = -3.7233;
+    // ── Booking form (front-end only: hook a backend or form service to `submit`)
+    const form = document.querySelector<HTMLFormElement>("[data-form]")
+    if (form) {
+        const statusEl = form.querySelector<HTMLElement>("[data-form-status]")!
+        const date = form.querySelector<HTMLInputElement>("#f-date")!
+        const today = new Date()
+        const iso = new Date(
+            today.getTime() - today.getTimezoneOffset() * 60000,
+        )
+            .toISOString()
+            .slice(0, 10)
+        date.min = iso
 
-  const map = L.map("map", {
-    center: [LAT, LNG],
-    zoom: 15,
-    zoomControl: true,
-    scrollWheelZoom: false,
-  });
+        const fields = [
+            ...form.querySelectorAll<HTMLInputElement>("[data-error]"),
+        ]
 
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
+        const validate = (input: HTMLInputElement) => {
+            let ok = true
+            const value = input.value.trim()
+            if (input.name === "name") ok = value.length > 1
+            if (input.name === "phone")
+                ok = /^(\+34)?[6789]\d{8}$/.test(value.replace(/[\s.-]/g, ""))
+            if (input.name === "date") ok = !value || value >= iso
+            const error = document.getElementById(`${input.id}-error`)!
+            input.setAttribute("aria-invalid", String(!ok))
+            error.textContent = ok ? "" : input.dataset.error!
+            return ok
+        }
 
-  const markerIcon = L.divIcon({
-    className: "",
-    html: `<div style="
-      width: 36px;
-      height: 36px;
-      background: #D35400;
-      border: 3px solid #fff;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    "></div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -40],
-  });
+        fields.forEach((input) => {
+            input.addEventListener("blur", () => input.value && validate(input))
+            input.addEventListener("input", () => {
+                if (input.getAttribute("aria-invalid") === "true")
+                    validate(input)
+            })
+        })
 
-  const marker = L.marker([LAT, LNG], { icon: markerIcon }).addTo(map);
+        form.addEventListener("submit", (e) => {
+            e.preventDefault()
+            statusEl.classList.remove("is-success")
+            const invalid = fields.filter((f) => !validate(f))
+            if (invalid.length) {
+                statusEl.textContent = form.dataset.errorSummary!
+                invalid[0].focus()
+                return
+            }
+            statusEl.textContent = statusEl.dataset.success!
+            statusEl.classList.add("is-success")
+            form.reset()
+            fields.forEach((f) => f.removeAttribute("aria-invalid"))
+        })
+    }
 
-  marker
-    .bindPopup(
-      `
-    <div style="font-family: 'Outfit', sans-serif; min-width: 160px;">
-      <strong style="font-size: 1rem; color: #D35400; display: block; margin-bottom: 4px;">
-        Taller Mecánico
-      </strong>
-      <span style="font-size: 0.85rem; color: #ccc; line-height: 1.5;">
-        Calle del Motor 47<br/>Getafe, Madrid
-      </span>
-    </div>
-  `,
-    )
-    .openPopup();
+    // ── Map: only load Leaflet when the map approaches the viewport
+    const mapEl = document.querySelector<HTMLElement>("[data-map]")
+    if (mapEl) {
+        const io = new IntersectionObserver(
+            async ([entry]) => {
+                if (!entry.isIntersecting) return
+                io.disconnect()
+                const { createMap } = await import("../scripts/map")
+                await createMap(
+                    mapEl,
+                    Number(mapEl.dataset.lat),
+                    Number(mapEl.dataset.lng),
+                    mapEl.dataset.label!,
+                )
+                mapEl.querySelector(".map__loading")?.remove()
+            },
+            { rootMargin: "600px 0px" },
+        )
+        io.observe(mapEl)
+    }
 </script>

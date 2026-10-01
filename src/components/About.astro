@@ -1,249 +1,447 @@
 ---
-import { useTranslations } from "../i18n/utils";
+import { Picture } from "astro:assets";
+import { useTranslations, rich, yearsSinceFounded, type Lang } from "../i18n/utils";
 import garageOld from "../assets/about/garage_old.webp";
 import garageNew from "../assets/about/garage_new.webp";
 
-const { lang = "es" } = Astro.props;
+const { lang } = Astro.props as { lang: Lang };
 const t = useTranslations(lang);
+const years = yearsSinceFounded();
+const locale = lang === "es" ? "es-ES" : "en-GB";
+
+const title = rich(t("about.title")).replace("{years}", `<span data-years>${years}</span>`);
+const stats = [
+  { value: years, suffix: "", label: t("about.stat.years"), years: true },
+  { value: 15000, suffix: "+", label: t("about.stat.cars") },
+  { value: 2, suffix: "", label: t("about.stat.brothers") },
+];
+const pictureProps = {
+  widths: [640, 1024, 1600, 2200],
+  sizes: "(min-width: 1440px) 1330px, calc(100vw - 2 * clamp(1rem, 4vw, 3.5rem))",
+  formats: ["avif"] as const,
+  fallbackFormat: "webp" as const,
+  loading: "lazy" as const,
+  decoding: "async" as const,
+};
 ---
 
-<section id="about" class="about-section">
+<section id="about" class="about" aria-labelledby="about-title" data-about>
   <div class="container">
-    <div class="about-content">
-      <h2>{t("about.title")}</h2>
-      <p>{t("about.text1")}</p>
-      <p>{t("about.text2")}</p>
+    <div class="about__intro">
+      <div>
+        <p class="eyebrow" data-reveal="fade">{t("about.eyebrow")}</p>
+        <h2 class="section-title about__title" id="about-title" data-reveal="lines" set:html={title} />
+      </div>
+      <div class="about__text" data-reveal="stagger">
+        <p>{t("about.text1")}</p>
+        <p>{t("about.text2")}</p>
+      </div>
     </div>
 
-    <div class="about-visuals">
-      <div class="slider-container">
-        <div class="image-wrapper after">
-          <img src={garageNew.src} alt="New Garage" />
-          <span class="label">{t("about.new")}</span>
-        </div>
-        <div class="image-wrapper before">
-          <img src={garageOld.src} alt="Old Garage" />
-          <span class="label">{t("about.old")}</span>
-        </div>
-        <div class="slider-handle">
-          <div class="handle-line"></div>
-          <div class="handle-circle">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              ><path d="m9 18-6-6 6-6"></path><path d="m15 18 6-6-6-6"
-              ></path></svg
-            >
+    <dl class="stats" data-reveal="stagger">
+      {
+        stats.map((s) => (
+          <div class="stat">
+            <dt class="stat__label">{s.label}</dt>
+            <dd class="stat__value">
+              <span class="visually-hidden">
+                <span data-years={s.years ? "" : undefined}>{s.value.toLocaleString(locale)}</span>
+                {s.suffix}
+              </span>
+              <span aria-hidden="true">
+                <span data-count={s.value} data-years={s.years ? "" : undefined} data-locale={locale}>
+                  {s.value.toLocaleString(locale)}
+                </span>
+                {s.suffix && <span class="stat__suffix">{s.suffix}</span>}
+              </span>
+            </dd>
           </div>
+        ))
+      }
+    </dl>
+
+    <figure class="compare" data-compare>
+      <div class="compare__frame" data-compare-frame data-reveal="clip">
+        <Picture src={garageNew} alt={t("about.new.alt")} class="compare__img" {...pictureProps} />
+        <div class="compare__old" data-compare-old>
+          <Picture src={garageOld} alt={t("about.old.alt")} class="compare__img" {...pictureProps} />
         </div>
+
         <input
+          class="compare__range"
           type="range"
           min="0"
           max="100"
+          step="1"
           value="50"
-          class="slider-input"
-          aria-label="Before After Slider"
+          aria-label={t("about.slider.label")}
+          aria-valuetext={t("about.slider.value").replace("{value}", "50")}
+          data-value-template={t("about.slider.value")}
+          data-compare-range
         />
+        <div class="compare__handle" aria-hidden="true">
+          <span class="compare__knob">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6" /></svg>
+          </span>
+        </div>
+
+        <span class="compare__tag compare__tag--old" aria-hidden="true">{t("about.old")}</span>
+        <span class="compare__tag compare__tag--new" aria-hidden="true">{t("about.new")}</span>
+        <span class="compare__cursor" aria-hidden="true" data-compare-cursor><span>{t("about.slider.hint")}</span></span>
       </div>
-    </div>
+    </figure>
   </div>
 </section>
 
 <style>
-  .about-section {
-    padding: 8rem 0;
-    background-color: var(--color-secondary);
+  .about {
+    padding-block: var(--section);
+    background: var(--ink-2);
+    border-top: 1px solid var(--line);
   }
 
-  .container {
+  .about__intro {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 4rem;
-    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+    margin-bottom: clamp(3rem, 7vw, 6rem);
   }
 
-  @media (min-width: 900px) {
-    .container {
-      grid-template-columns: 1fr 1.5fr; /* Visuals take more space */
+  .about__title {
+    margin-top: 1.5rem;
+  }
+
+  .about__text {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 46ch;
+    font-size: var(--fs-lead);
+    line-height: 1.55;
+    color: var(--bone-2);
+  }
+
+  @media (min-width: 1024px) {
+    .about__intro {
+      grid-template-columns: 1.3fr 1fr;
+      align-items: end;
     }
   }
 
-  h2 {
-    font-size: 3rem;
-    margin-bottom: 2rem;
-    color: var(--color-accent);
+  /* ── Stats ─────────────────────────────────────────── */
+  .stats {
+    display: grid;
+    margin: 0 0 clamp(3rem, 7vw, 6rem);
+    border-top: 1px solid var(--line);
   }
 
-  p {
-    font-size: 1.1rem;
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-    color: #ccc;
-  }
-
-  /* Slider Styles */
-  .slider-container {
-    position: relative;
-    width: 100%;
-    height: 500px; /* Bigger height */
-    overflow: hidden;
-    border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    border: 4px solid #333;
-  }
-
-  .image-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .image-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-
-  .image-wrapper.before {
-    width: 50%; /* Initial state */
-    overflow: hidden;
-    z-index: 2;
-  }
-
-  .image-wrapper.before img {
-    width: var(--slider-width);
-    max-width: none;
-  }
-
-  .label {
-    position: absolute;
-    bottom: 20px;
-    padding: 5px 15px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    font-weight: bold;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .before .label {
-    left: 20px;
-  }
-  .after .label {
-    right: 20px;
-    z-index: 1;
-  }
-
-  /* Handle */
-  .slider-handle {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 4px;
-    background: white;
-    z-index: 3;
-    transform: translateX(-50%);
-    pointer-events: none;
-  }
-
-  .handle-circle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    background: white;
-    border-radius: 50%;
+  .stat {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #333;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--line);
   }
 
-  .slider-input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: col-resize;
-    z-index: 4;
+  .stat__value {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 9vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat__suffix {
+    color: var(--copper);
+  }
+
+  .stat__label {
+    font-size: var(--fs-small);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  @media (min-width: 768px) {
+    .stats {
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stat {
+      padding: 2.5rem 2rem 2.5rem 0;
+      border-bottom: 0;
+    }
+
+    .stat + .stat {
+      padding-left: 2rem;
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  /* ── Before / after ────────────────────────────────── */
+  .compare {
     margin: 0;
   }
 
-  @media (max-width: 768px) {
-    .slider-container {
-      height: 300px;
+  .compare__frame {
+    --pos: 50%;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--ink-3);
+    cursor: ew-resize;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  @media (min-width: 768px) {
+    .compare__frame {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  .compare__frame :global(picture),
+  .compare__old {
+    position: absolute;
+    inset: 0;
+  }
+
+  .compare__frame :global(.compare__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .compare__old {
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+    will-change: clip-path;
+  }
+
+  .compare__old :global(img) {
+    filter: sepia(0.25) contrast(1.05);
+  }
+
+  .compare__range {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .compare__handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 1px;
+    background: var(--bone);
+    pointer-events: none;
+  }
+
+  .compare__knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: var(--bone);
+    color: var(--ink);
+    translate: -50% -50%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transition: scale 0.5s var(--ease-out), background-color 0.4s;
+  }
+
+  .compare__knob svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .compare__frame:active .compare__knob,
+  .compare__frame.is-dragging .compare__knob {
+    scale: 0.88;
+    background: var(--copper);
+  }
+
+  .compare__range:focus-visible ~ .compare__handle .compare__knob {
+    outline: 2px solid var(--copper);
+    outline-offset: 4px;
+  }
+
+  .compare__tag {
+    position: absolute;
+    bottom: clamp(1rem, 3vw, 2rem);
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(237, 232, 223, 0.35);
+    border-radius: 999px;
+    background: rgba(11, 11, 12, 0.55);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .compare__tag--old {
+    left: clamp(1rem, 3vw, 2rem);
+  }
+
+  .compare__tag--new {
+    right: clamp(1rem, 3vw, 2rem);
+  }
+
+  .compare__cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    width: 5.5rem;
+    height: 5.5rem;
+    margin: -2.75rem 0 0 -2.75rem;
+    pointer-events: none;
+  }
+
+  .compare__cursor span {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--copper);
+    color: var(--ink);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 0.3s, transform 0.5s var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .compare__cursor {
+      display: block;
+    }
+
+    .compare__frame:hover .compare__cursor span {
+      opacity: 1;
+      transform: none;
+    }
+
+    .compare__frame.is-dragging .compare__cursor span,
+    .compare__frame.near-handle .compare__cursor span {
+      opacity: 0;
+      transform: scale(0.4);
     }
   }
 </style>
 
 <script>
-  import { gsap } from "gsap";
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  import { gsap, reducedMotion, finePointer } from "../scripts/motion";
 
-  gsap.registerPlugin(ScrollTrigger);
+  const root = document.querySelector<HTMLElement>("[data-about]");
+  if (root) {
+    // Keep "years" honest even if the site is not rebuilt every January.
+    const years = String(new Date().getFullYear() - 1996);
+    root.querySelectorAll<HTMLElement>("[data-years]").forEach((el) => {
+      el.textContent = years;
+      if (el.dataset.count) el.dataset.count = years;
+    });
 
-  // Animation for content
-  gsap.from(".about-content", {
-    scrollTrigger: {
-      trigger: ".about-section",
-      start: "top 70%",
-    },
-    x: -50,
-    opacity: 0,
-    duration: 1,
-    ease: "power2.out",
-  });
+    // Count-up stats
+    if (!reducedMotion()) {
+      root.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
+        const end = Number(el.dataset.count);
+        const fmt = new Intl.NumberFormat(el.dataset.locale);
+        const obj = { v: 0 };
+        el.textContent = fmt.format(0);
+        gsap.to(obj, {
+          v: end,
+          duration: end > 100 ? 2.4 : 1.6,
+          ease: "power3.out",
+          onUpdate: () => (el.textContent = fmt.format(Math.round(obj.v))),
+          scrollTrigger: { trigger: el, start: "top 90%", once: true },
+        });
+      });
+    }
 
-  gsap.from(".slider-container", {
-    scrollTrigger: {
-      trigger: ".about-section",
-      start: "top 70%",
-    },
-    y: 50,
-    opacity: 0,
-    duration: 1,
-    ease: "power2.out",
-    delay: 0.2,
-  });
+    // Before / after
+    const frame = root.querySelector<HTMLElement>("[data-compare-frame]")!;
+    const range = root.querySelector<HTMLInputElement>("[data-compare-range]")!;
+    const cursor = root.querySelector<HTMLElement>("[data-compare-cursor]");
+    const template = range.dataset.valueTemplate ?? "{value}";
+    const state = { v: 50 };
+    let touched = false;
 
-  // Slider Logic
-  const sliders = document.querySelectorAll(".slider-container");
-
-  sliders.forEach((container) => {
-    const input = container.querySelector(".slider-input") as HTMLInputElement;
-    const beforeImage = container.querySelector(".before") as HTMLElement;
-    const handle = container.querySelector(".slider-handle") as HTMLElement;
-
-    const updateSlider = () => {
-      const value = Number(input.value);
-      const containerWidth = container.getBoundingClientRect().width;
-
-      beforeImage.style.setProperty("--slider-width", `${containerWidth}px`);
-      beforeImage.style.width = `${value}%`;
-      handle.style.left = `${value}%`;
+    const set = (v: number) => {
+      const value = Math.max(0, Math.min(100, v));
+      frame.style.setProperty("--pos", `${value}%`);
+      range.value = String(Math.round(value));
+      range.setAttribute("aria-valuetext", template.replace("{value}", range.value));
     };
 
-    input.addEventListener("input", updateSlider);
-    // Initialize
-    window.addEventListener("resize", updateSlider);
-    updateSlider();
-  });
+    const fromPointer = (e: PointerEvent) => {
+      const r = frame.getBoundingClientRect();
+      set(((e.clientX - r.left) / r.width) * 100);
+    };
+
+    let dragging = false;
+    frame.addEventListener("pointerdown", (e) => {
+      touched = true;
+      gsap.killTweensOf(state);
+      dragging = true;
+      frame.classList.add("is-dragging");
+      frame.setPointerCapture(e.pointerId);
+      fromPointer(e);
+    });
+    frame.addEventListener("pointermove", (e) => {
+      if (dragging) fromPointer(e);
+    });
+    const stop = () => {
+      dragging = false;
+      frame.classList.remove("is-dragging");
+    };
+    frame.addEventListener("pointerup", stop);
+    frame.addEventListener("pointercancel", stop);
+
+    range.addEventListener("input", () => {
+      touched = true;
+      gsap.killTweensOf(state);
+      set(Number(range.value));
+    });
+
+    // A gentle hint that the image can be dragged.
+    if (!reducedMotion()) {
+      gsap
+        .timeline({
+          scrollTrigger: { trigger: frame, start: "top 60%", once: true },
+          delay: 0.6,
+          onUpdate: () => !touched && set(state.v),
+        })
+        .to(state, { v: 72, duration: 1.1, ease: "power2.inOut" })
+        .to(state, { v: 30, duration: 1.4, ease: "power2.inOut" })
+        .to(state, { v: 50, duration: 1.1, ease: "power2.inOut" });
+    }
+
+    // Cursor label that follows the pointer.
+    if (cursor && finePointer()) {
+      const xTo = gsap.quickTo(cursor, "x", { duration: 0.5, ease: "power3.out" });
+      const yTo = gsap.quickTo(cursor, "y", { duration: 0.5, ease: "power3.out" });
+      frame.addEventListener("pointermove", (e) => {
+        const r = frame.getBoundingClientRect();
+        const x = e.clientX - r.left;
+        xTo(x);
+        yTo(e.clientY - r.top);
+        const handleX = (Number(range.value) / 100) * r.width;
+        frame.classList.toggle("near-handle", Math.abs(x - handleX) < 60);
+      });
+    }
+  }
 </script>
